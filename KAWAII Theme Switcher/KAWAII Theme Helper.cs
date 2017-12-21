@@ -1,19 +1,16 @@
 ﻿/*
  * This file is absolutely FREE, can freely be copied, modified, compiled, or decompiled.
  * Also, you may print it and eat it with pizza, burn it in bizarre rituals,
- * or put it in the middle of Transmutation circle to revive someone, 
+ * or put it in the middle of Transmutation circle and do some shit, 
  * 
  * or whatever.
  * 
- * 
- * I don't give a fuck, as long as you leave this notice* when distributing it.
- * 
- * 
- * (*) If less than 20% of my original code remains, don't bother.
+ * I don't give a fuck, as long as you leave this notice when distributing it.
  * 
  * 
  * 
  * Originally created by Kuchienkz.
+ * 
  * Email: wahyu.darkflame@gmail.com
  */
 
