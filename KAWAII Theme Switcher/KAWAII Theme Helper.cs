@@ -31,7 +31,7 @@ namespace KAWAII_Theme_Switcher
         private static string windir = Environment.GetEnvironmentVariable("windir");
 
         [DllImport("UxTheme.Dll", EntryPoint = "#65", CharSet = CharSet.Unicode)]
-        public static extern int SetSystemVisualStyle(string pszFilename, string pszColor, string pszSize, int dwReserved);
+        private static extern int SetSystemVisualStyle(string pszFilename, string pszColor, string pszSize, int dwReserved);
 
         [DllImport("winmm.dll")]
         private static extern uint mciSendString(string command, StringBuilder returnValue, int returnLength, IntPtr winHandle);
@@ -51,7 +51,7 @@ namespace KAWAII_Theme_Switcher
         }
 
         [ComImport, Guid("D23CC733-5522-406D-8DFB-B3CF5EF52A71"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface ITheme
+        private interface ITheme
         {
             [DispId(0x60010000)]
             string DisplayName
@@ -71,7 +71,7 @@ namespace KAWAII_Theme_Switcher
         }
 
         [ComImport, Guid("0646EBBE-C1B7-4045-8FD0-FFD65D3FC792"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface IThemeManager
+        private interface IThemeManager
         {
             [DispId(0x60010000)]
             ITheme CurrentTheme
@@ -86,10 +86,10 @@ namespace KAWAII_Theme_Switcher
         }
 
         [ComImport, Guid("A2C56C2A-E63A-433E-9953-92E94F0122EA"), CoClass(typeof(ThemeManagerClass))]
-        public interface ThemeManager : IThemeManager { }
+        private interface ThemeManager : IThemeManager { }
 
         [ComImport, Guid("C04B329E-5823-4415-9C93-BA44688947B0"), ClassInterface(ClassInterfaceType.None), TypeLibType(TypeLibTypeFlags.FCanCreate)]
-        public class ThemeManagerClass : IThemeManager, ThemeManager
+        private class ThemeManagerClass : IThemeManager, ThemeManager
         {
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
             public virtual extern void ApplyTheme([In, MarshalAs(UnmanagedType.BStr)] string bstrThemePath);
@@ -118,7 +118,7 @@ namespace KAWAII_Theme_Switcher
             return themeManager.CurrentTheme.DisplayName;
         }
 
-        public static void ApplyTheme(string themePath)
+        public static void ApplyTheme(string themePath, int exitDelay = 1500)
         {
             string msstylePath = "";
             string color = "NormalColor";
@@ -170,11 +170,11 @@ namespace KAWAII_Theme_Switcher
             SetSystemVisualStyle(msstylePath, color, size, 0);
             ChangeTheme(themePath);
             TCSound = TCSound < 1500 ? 1500 : TCSound;
-            Task.Factory.StartNew(() => Thread.Sleep(TCSound + 500)).Wait();
+            Task.Factory.StartNew(() => Thread.Sleep(TCSound + exitDelay)).Wait();
         }
 
         [PermissionSet(SecurityAction.LinkDemand)]
-        public static void ChangeTheme(string themeFilePath)
+        private static void ChangeTheme(string themeFilePath)
         {
             themeManager.ApplyTheme(themeFilePath);
         }
@@ -193,7 +193,7 @@ namespace KAWAII_Theme_Switcher
         // Logon Stuff
         public static void ChangeLogonBackground(string jpegFilename)
         {
-            if (!File.Exists(jpegFilename))
+            if (!File.Exists(jpegFilename) || new FileInfo(jpegFilename).Length > 256000)
             {
                 return;
             }
