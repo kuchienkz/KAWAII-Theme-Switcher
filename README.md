@@ -5,36 +5,65 @@ Use this app to switch between Windows themes with just One click! Plus, without
 KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
 
 # Main Features
-- Small, kawaii file size.
-- No services, background process etc.
-- Play theme's "theme change" sound (if any) until the very ends, before exiting.
+* Small, kawaii file size.
+* No services, background process etc.
+* Play theme's "theme change" sound (if any) until the very ends, before exiting.
+* Ability to change User Logon backgorund (tested on Windows 7).
 
-# Installation
+## System Requirements (running SharpDevelop)
+ - [.NET 4.0 or Above](https://www.microsoft.com/en-au/download/details.aspx?id=17851)
+ 
+## Installation
 NO NEED for installation! Since this guy doesn't have any GUI, just put the EXE somewhere nice, Thats all!
 
-# Extra Features
+## Extra Features
 Well, in order to enable some features, you need to do some stuff, but don't worry, i will keep it simple and clean!
 
-- To launch this tool on every Startup:
-Inside the folder where you put the EXE, create a text file named "startup.txt". 
-Open it, write "delay: 10000", make sure you wrote it on the first line. 
-save and close. Lastly, launch the EXE, it will automatically create a shortcut on your startup folder.
-What about the "Delay"? Thats a delay before changing your theme when it launch on startup, in Milliseconds.
-So, 10000 means 10 seconds delay before changing theme. Yes, you may modify this.
+### Launch on every Startup
+- Inside the folder where you put the EXE, create a text file named "startup.txt". 
+- Open it, write "start: 10000", make sure you wrote it on the FIRST LINE.
+- Save and close.
+- Lastly, launch the EXE, it will automatically create a shortcut on your startup folder.
+* What about the "Delay"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
+So, 10000 means 10 seconds delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
+Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remeber that negative values are count as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
+* You can also set the "Exit Delay" by writing "exit: [delay]" on the second line. This will hold application before actually closing.
+This is useful if you heard the "theme change" sound trimmed. Exit delay doesn't support negative values.
 
-- Theme Selection Mode:
+### Theme Selection Mode
 Normally, KTS use RANDOM mode for theme selection. That means, on each launch, it will pick a theme RANDOMLY from your themes folder.
-Actually, there are 2 more modes for this. The first is SEQUENTIAL mode. Just like the name, it will pick themes SEQUENTIALLY, from A to Z. Unlike RANDOM mode, SEQUENTIAL mode will make sure all themes are used.
-The second is RANDOM SEQUENTIAL. This mode is a combination of the last 2 modes. All of your themes will be shuffled 
-and then picked sequentially on each run.
-Inside the folder where you put the EXE,
-To change selection mode: Create an empty text file.
-To enable SEQUENTIAL mode: name it "Sequence.txt". For RANDOM SEQUENTIAL: name it "RSequence.txt". Thats all.
+Actually, there are 2 more modes for this. 
+#### SEQUENTIAL mode.
+Just like the name, it will pick themes SEQUENTIALLY, from A to Z. Unlike RANDOM mode, SEQUENTIAL mode will make sure all themes are used.
+#### RANDOM SEQUENTIAL mode
+This mode is a combination of the last 2 modes. All of your themes will be shuffled and then picked sequentially on each run.
 
-- Exclusion: In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
-Inside the folder where you put the EXE, create a text file named "exclusion.txt". Now open it, and put some theme's name there,
-without extension, just the name, one name per line.
-All themes inside this file will be excluded from selection (all modes).
+#### How To
+- Inside the folder where you put the EXE, create an empty text file.
+- To enable SEQUENTIAL mode: name it "Sequence.txt", for RANDOM SEQUENTIAL: name it "RSequence.txt".
+- In the future, to enable RANDOM mode, delete the file.
 
-# Additional Information
+### Exclusion
+In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
+
+#### How To
+- Inside the folder where you put the EXE, create a text file named "exclusion.txt".
+- Open it, and put some theme's name there, without extension, just the name, one name per line.
+- All themes inside this file will be excluded from selection (all modes).
+
+### Logon Background Switching
+3rd-party themes usually comes with it's own Logon background. KAWAII Theme Switcher support changing Logon background with any .jpg file.
+
+### How To
+- Inside the folder where you put the EXE, create a text file named "logon.txt".
+- Open it, write "mode: [mode; see below.]"
+- Save and Close.
+
+### Logon Selection Mode (Without Quotes!)
+- `respective` - Pick Logon background based on current theme if it have it's own Logon background. If not, do nothing. This is the Default mode.
+- `sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
+- `random` - Pick a random .jpg file inside %windir%/Resources/Logon and it's subdirectories.
+- `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
+
+## Additional Information
 - Tested on Windows 7 Ultimate 64bit with 3rd-party theme support.
