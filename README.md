@@ -52,7 +52,7 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - All themes inside this file will be excluded from selection (all modes).
 
 ### Logon Background Switching
-3rd-party themes usually comes with it's own Logon background. KAWAII Theme Switcher support changing Logon background with any .jpg file.
+3rd-party themes usually comes with it's own Logon background. KAWAII Theme Switcher support changing Logon background with `any .jpg file with maximum size of 256KB`.
 
 ### How To
 - Inside the folder where you put the EXE, create a text file named "logon.txt".
@@ -60,7 +60,7 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - Save and Close.
 
 ### Logon Selection Mode (Without Quotes!)
-- `respective` - Pick Logon background based on current theme if it have it's own Logon background. If not, do nothing. This is the Default mode.
+- `respective` - Default mode. Pick Logon background based on current theme if it have it's own Logon background. If not, do nothing.
 - `sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
 - `random` - Pick a random .jpg file inside %windir%/Resources/Logon and it's subdirectories.
 - `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
