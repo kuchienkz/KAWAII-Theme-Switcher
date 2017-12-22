@@ -4,11 +4,12 @@ A small tool for Windows Theme enthusiast.
 Use this app to switch between Windows themes with just One click! Plus, without showing any dialog! Yup. 
 KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
 
-# Main Features
+## Main Features
 * Small, kawaii file size.
 * No services, background process etc.
 * Play theme's "theme change" sound (if any) until the very ends, before exiting.
 * Ability to change User Logon backgorund (tested on Windows 7).
+* Command Prompt support with arguments.
 
 ## System Requirements (running SharpDevelop)
  - [.NET 4.0 or Above](https://www.microsoft.com/en-au/download/details.aspx?id=17851)
@@ -54,16 +55,58 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 ### Logon Background Switching
 3rd-party themes usually comes with it's own Logon background. KAWAII Theme Switcher support changing Logon background with `any .jpg file with maximum size of 256KB`.
 
-### How To
+#### How To
 - Inside the folder where you put the EXE, create a text file named "logon.txt".
 - Open it, write "mode: [mode; see below.]"
 - Save and Close.
 
-### Logon Selection Mode (Without Quotes!)
+#### Logon Selection Mode (Without Quotes!)
 - `respective` - Default mode. Pick Logon background based on current theme if it have it's own Logon background. If not, do nothing.
 - `sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
 - `random` - Pick a random .jpg file inside %windir%/Resources/Logon and it's subdirectories.
 - `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
+
+### Launch from Command Prompt
+Yes, you can launch KAWAII Theme Switcher via Command Prompt!
+
+#### How To
+```xaml
+KAWAII Theme Switcher.exe [first argument. See below.] [second argument, see below. optional.]
+```
+
+#### First Arguments
+First arguments are for Theme Selection mode. Case-insensitive.
+- Path to .theme file (with quotes if there are spaces):
+```xaml
+> KAWAII Theme Switcher.exe C:\Windows\Resources\Themes\aero.theme
+> KAWAII Theme Switcher.exe "C:\Windows\Resources\Themes\Vocaloid Rin V2 by andrea_37.theme"
+```
+- Theme's name (with quotes if there are spaces):
+```xaml
+> KAWAII Theme Switcher.exe aero
+> KAWAII Theme Switcher.exe "Vocaloid Rin V2 by andrea_37"
+```
+- Random:
+```xaml
+> KAWAII Theme Switcher.exe random
+```
+
+#### Second Arguments
+Optional. Second arguments are for Logon Selection mode.
+- Path to .jpg file (with quotes if there are spaces):
+```xaml
+> KAWAII Theme Switcher.exe [first argument] C:\Users\Kuchienkz\Pictures\kagamineRin.jpg
+> KAWAII Theme Switcher.exe [first argument] "C:\Users\Kuchienkz\Pictures\Hatsune Miku.jpg"
+```
+- Random
+```xaml
+> KAWAII Theme Switcher.exe [first argument] Random
+```
+- Respective
+Respective mode only works if first argument is not empty.
+```xaml
+> KAWAII Theme Switcher.exe [first argument] ""
+```
 
 ## Additional Information
 - Tested on Windows 7 Ultimate 64bit with 3rd-party theme support.
