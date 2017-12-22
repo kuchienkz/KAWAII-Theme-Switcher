@@ -98,12 +98,11 @@ Optional. Second arguments are for Logon Selection mode.
 > KAWAII Theme Switcher.exe [first argument] C:\Users\Kuchienkz\Pictures\kagamineRin.jpg
 > KAWAII Theme Switcher.exe [first argument] "C:\Users\Kuchienkz\Pictures\Hatsune Miku.jpg"
 ```
-- Random
+- Random:
 ```xaml
 > KAWAII Theme Switcher.exe [first argument] Random
 ```
-- Respective
-Respective mode only works if first argument is not empty.
+- Respective (only works if first argument is not empty):
 ```xaml
 > KAWAII Theme Switcher.exe [first argument] ""
 ```
