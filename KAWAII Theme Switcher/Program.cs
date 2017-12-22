@@ -79,7 +79,7 @@ namespace KAWAII_Theme_Switcher
                     {
                         ChangeLogon("random", _exclude, "", true);
                     }
-                    else if (!args[2].EqualsIgnoreCase(""))
+                    else if (!path.Equals("") && !args[2].Equals(""))
                     {
                         ChangeLogon("respective", _exclude, path, true);
                     }
@@ -126,7 +126,8 @@ namespace KAWAII_Theme_Switcher
                         using (System.Diagnostics.PerformanceCounter cpu = new System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total"))
                         {
                             int hits = 0;
-                            while (hits < startupDelay * -1)
+                            startupDelay = startupDelay <= -1000 ? (int)Math.Ceiling(startupDelay / -1000.0) : (int)Math.Ceiling(startupDelay / -1.0);
+                            while (hits < startupDelay)
                             {
                                 cpu.NextValue();
                                 Thread.Sleep(1000);
