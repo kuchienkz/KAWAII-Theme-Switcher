@@ -12,7 +12,7 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 * Command Prompt support with arguments.
 
 ## System Requirements
- - [.NET 4.0 or Above](https://www.microsoft.com/en-au/download/details.aspx?id=17851)
+ - [.NET 4.6 or Above](https://www.microsoft.com/en-us/download/details.aspx?id=48130)
  
 ## Installation
 NO NEED for installation! Since this guy doesn't have any GUI, just put the EXE somewhere nice, Thats all!
@@ -43,6 +43,9 @@ This mode is a combination of the last 2 modes. All of your themes will be shuff
 - Inside the folder where you put the EXE, create an empty text file.
 - To enable SEQUENTIAL mode: name it "Sequence.txt", for RANDOM SEQUENTIAL: name it "RSequence.txt".
 - In the future, to enable RANDOM mode, delete the file.
+
+### Skip (NEW)
+You can skip next switching by creating 'skip.txt' file inside the folder where you put the EXE. Once skipped, the 'skip.txt' file will be deleted.
 
 ### Exclusion
 In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
