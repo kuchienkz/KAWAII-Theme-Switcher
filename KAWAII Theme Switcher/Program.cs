@@ -27,7 +27,6 @@ namespace KAWAII_Theme_Switcher
 {
     static class Program
     {
-        private static string[] _themes;
         private static string[] _exclude;
         private static string windir = Environment.GetEnvironmentVariable("windir");
 
