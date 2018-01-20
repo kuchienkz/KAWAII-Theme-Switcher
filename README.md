@@ -8,10 +8,10 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 * Small, kawaii file size.
 * No services, background process etc.
 * Play theme's "theme change" sound (if any) until the very ends, before exiting.
-* Ability to change User Logon backgorund (tested on Windows 7).
+* Ability to change User Logon background (tested on Windows 7).
 * Command Prompt support with arguments.
 
-## System Requirements (running SharpDevelop)
+## System Requirements
  - [.NET 4.0 or Above](https://www.microsoft.com/en-au/download/details.aspx?id=17851)
  
 ## Installation
