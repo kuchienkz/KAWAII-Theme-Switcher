@@ -34,6 +34,12 @@ namespace KAWAII_Theme_Switcher
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
         static void Main(string[] args)
         {
+            if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
+            {
+                File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+                return;
+            }
+
             var path = "";
             //Load Exclusion
             if (File.Exists(Environment.CurrentDirectory + "\\exclusion.txt"))
