@@ -1,5 +1,5 @@
 # KAWAII Theme Switcher
-A small tool for Windows Theme enthusiast.
+A small tool for Windows 7 Theme enthusiast.
 
 Use this app to switch between Windows themes with just One click! Plus, without showing any dialog! Yup. 
 KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
@@ -12,7 +12,9 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 * Command Prompt support with arguments.
 
 ## System Requirements
+ - Windows 7 Ultimate as operating System
  - [.NET 4.6 or Above](https://www.microsoft.com/en-us/download/details.aspx?id=48130)
+ - 3rd-party theme support (optional, but recommended)
  
 ## Installation
 NO NEED for installation! Since this guy doesn't have any GUI, just put the EXE somewhere nice, Thats all!
