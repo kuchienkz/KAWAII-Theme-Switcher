@@ -26,9 +26,9 @@ Well, in order to enable some features, you need to do some stuff, but don't wor
 - Inside the folder where you put the EXE, create a text file named "startup.txt". 
 - Open it, write "start: 10000", make sure you wrote it on the FIRST LINE.
 - Save and close.
-- Lastly, launch the EXE, it will automatically create a shortcut on your startup folder.
-* What about the "Delay"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
-So, 10000 means 10 seconds delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
+- Lastly, launch the EXE, it will automatically create a registry for startup purpose.
+* What about the "start"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
+So, '10000' means '10 seconds' delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
 Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remeber that negative values are count as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
 * You can also set the "Exit Delay" by writing "exit: [delay]" on the second line. This will hold application before actually closing.
 This is useful if you heard the "theme change" sound trimmed. Exit delay doesn't support negative values.
@@ -46,8 +46,13 @@ This mode is a combination of the last 2 modes. All of your themes will be shuff
 - To enable SEQUENTIAL mode: name it "Sequence.txt", for RANDOM SEQUENTIAL: name it "RSequence.txt".
 - In the future, to enable RANDOM mode, delete the file.
 
-### Skip (NEW)
-You can skip next switching by creating 'skip.txt' file inside the folder where you put the EXE. Once skipped, the 'skip.txt' file will be deleted.
+### Skip
+You can skip next switching (once) by creating 'skip.txt' file inside the folder where you put the EXE. Once skipped, the 'skip.txt' file will be deleted. OR, you can create a 'repeating skip' by creating 'skip.txt' and add these lines:
+```xaml
+3/3
+repeat
+```
+This is useful if you want to switch theme every X startup, instead of every startup.
 
 ### Exclusion
 In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
