@@ -78,7 +78,8 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
 
 ### Launch from Command Prompt
-Yes, you can launch KAWAII Theme Switcher via Command Prompt!
+- Yes, you can launch KAWAII Theme Switcher via Command Prompt!
+- BUT! You can't use all 'extra features' mentioned above, since all .txt files will be ignored.
 
 #### How To
 ```xaml
