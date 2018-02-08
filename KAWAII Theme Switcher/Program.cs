@@ -14,6 +14,7 @@
  * Email: wahyu.darkflame@gmail.com
  */
 
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,18 +34,7 @@ namespace KAWAII_Theme_Switcher
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
         static void Main(string[] args)
         {
-            if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
-            {
-                File.Delete(Environment.CurrentDirectory + "\\skip.txt");
-                return;
-            }
-
             var path = "";
-            //Load Exclusion
-            if (File.Exists(Environment.CurrentDirectory + "\\exclusion.txt"))
-            {
-                _exclude = ReadAllLines(Environment.CurrentDirectory + "\\exclusion.txt").ToArray();
-            }
 
             if (args.Length > 1)
             {
@@ -62,10 +52,6 @@ namespace KAWAII_Theme_Switcher
                     else if (args[1].EqualsIgnoreCase("random"))
                     {
                         var themeList = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
-                        if (_exclude != null && _exclude.Count() > 0)
-                        {
-                            themeList = themeList.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a))).ToArray();
-                        }
                         path = themeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, themeList.Count() - 1)];
                         while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
                         {
@@ -97,8 +83,8 @@ namespace KAWAII_Theme_Switcher
             }
             else
             {
-                var startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
                 int exitDelay = 1500;
+                RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 if (File.Exists(Environment.CurrentDirectory + "\\startup.txt"))
                 {
                     int startupDelay = -3;
@@ -115,16 +101,18 @@ namespace KAWAII_Theme_Switcher
                     {
                         exitDelay = 1500;
                     }
+                    
+                    rk.SetValue(AppDomain.CurrentDomain.FriendlyName, Application.ExecutablePath);
 
-                    // Create shortcut on startup folder
-                    IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
-                    string shortcutAddress = startupFolder + @"\KAWAII Theme Switcher.lnk";
-                    IWshRuntimeLibrary.IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutAddress);
-                    shortcut.Description = "Shortcut for KAWAII Theme Switcher"; // description of the shortcut
-                    shortcut.WorkingDirectory = Application.StartupPath; /* working directory */
-                    shortcut.TargetPath = Application.ExecutablePath; /* path of the executable */
-                    shortcut.Arguments = "/a /c";
-                    shortcut.Save(); // save the shortcut 
+                    //// Create shortcut on startup folder
+                    //IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
+                    //string shortcutAddress = startupFolder + @"\KAWAII Theme Switcher.lnk";
+                    //IWshRuntimeLibrary.IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutAddress);
+                    //shortcut.Description = "Shortcut for KAWAII Theme Switcher"; // description of the shortcut
+                    //shortcut.WorkingDirectory = Application.StartupPath; /* working directory */
+                    //shortcut.TargetPath = Application.ExecutablePath; /* path of the executable */
+                    //shortcut.Arguments = "/a /c";
+                    //shortcut.Save(); // save the shortcut 
 
                     if (startupDelay <= -1)
                     {
@@ -154,12 +142,64 @@ namespace KAWAII_Theme_Switcher
                 }
                 else
                 {
-                    if (File.Exists(startupFolder + @"\KAWAII Theme Switcher.lnk"))
+                    //if (File.Exists(startupFolder + @"\KAWAII Theme Switcher.lnk"))
+                    //{
+                    //    File.Delete(startupFolder + @"\KAWAII Theme Switcher.lnk");
+                    //}
+                    rk.DeleteValue(AppDomain.CurrentDomain.FriendlyName, false);
+                }
+
+                if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
+                {
+                    if (File.ReadAllText(Environment.CurrentDirectory + "\\skip.txt").Replace(" ", "").Equals(""))
                     {
-                        File.Delete(startupFolder + @"\KAWAII Theme Switcher.lnk");
+                        File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+                        return;
+                    }
+
+                    var lns = File.ReadAllLines(Environment.CurrentDirectory + "\\skip.txt");
+                    File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+
+                    int rem = int.Parse(lns[0].Replace(" ", "").Split('/')[0]);
+                    if (lns.Length == 2)
+                    {
+                        if (rem <= 0)
+                        {
+                            if (lns[1].Replace(" ", "").Equals("repeat", StringComparison.OrdinalIgnoreCase) || Equals("true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rem = int.Parse(lns[0].Replace(" ", "").Split('/')[1]);
+                                File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + rem, "repeat" });
+                            }
+                        }
+                        else
+                        {
+                            rem--;
+                            File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
+                            if (lns[1].Replace(" ", "").Equals("repeat", StringComparison.OrdinalIgnoreCase) || Equals("true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                File.AppendAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { "repeat" });
+                            }
+                            return;
+                        }
+                    }
+                    else
+                    {
+
+                        if (rem > 0)
+                        {
+                            rem--;
+                            File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
+                            return;
+                        }
                     }
                 }
-                
+
+                //Load Exclusion
+                if (File.Exists(Environment.CurrentDirectory + "\\exclusion.txt"))
+                {
+                    _exclude = ReadAllLines(Environment.CurrentDirectory + "\\exclusion.txt").ToArray();
+                }
+
                 //Get latest list for checking new Themes
                 var latestThemeList = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
                 if (_exclude != null && _exclude.Count() > 0)
@@ -272,6 +312,10 @@ namespace KAWAII_Theme_Switcher
         static void ChangeLogon(string mode, string[] _exclude, string path, bool commandPrompt = false)
         {
             string windir = Environment.GetEnvironmentVariable("windir");
+            if (_exclude == null)
+            {
+                _exclude = new string[0];
+            }
             if (Directory.Exists(windir + @"\Resources\Logon"))
             {
                 var logons = Directory.GetFiles(windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories).ToList();
@@ -376,7 +420,6 @@ namespace KAWAII_Theme_Switcher
                 }
             }
         }
-
     }
     
     static class ThreadSafeRandom
