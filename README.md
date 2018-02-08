@@ -1,5 +1,5 @@
 # KAWAII Theme Switcher
-A small tool for Windows Theme enthusiast.
+A small tool for Windows 7 Theme enthusiast.
 
 Use this app to switch between Windows themes with just One click! Plus, without showing any dialog! Yup. 
 KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
@@ -12,7 +12,9 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 * Command Prompt support with arguments.
 
 ## System Requirements
- - [.NET 4.0 or Above](https://www.microsoft.com/en-au/download/details.aspx?id=17851)
+ - Windows 7 Ultimate as operating System
+ - [.NET 4.6 or Above](https://www.microsoft.com/en-us/download/details.aspx?id=48130)
+ - 3rd-party theme support (optional, but recommended)
  
 ## Installation
 NO NEED for installation! Since this guy doesn't have any GUI, just put the EXE somewhere nice, Thats all!
@@ -24,9 +26,9 @@ Well, in order to enable some features, you need to do some stuff, but don't wor
 - Inside the folder where you put the EXE, create a text file named "startup.txt". 
 - Open it, write "start: 10000", make sure you wrote it on the FIRST LINE.
 - Save and close.
-- Lastly, launch the EXE, it will automatically create a shortcut on your startup folder.
-* What about the "Delay"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
-So, 10000 means 10 seconds delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
+- Lastly, launch the EXE, it will automatically create a registry for startup purpose.
+* What about the "start"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
+So, '10000' means '10 seconds' delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
 Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remeber that negative values are count as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
 * You can also set the "Exit Delay" by writing "exit: [delay]" on the second line. This will hold application before actually closing.
 This is useful if you heard the "theme change" sound trimmed. Exit delay doesn't support negative values.
@@ -43,6 +45,15 @@ This mode is a combination of the last 2 modes. All of your themes will be shuff
 - Inside the folder where you put the EXE, create an empty text file.
 - To enable SEQUENTIAL mode: name it "Sequence.txt", for RANDOM SEQUENTIAL: name it "RSequence.txt".
 - In the future, to enable RANDOM mode, delete the file.
+
+### Skip
+You can skip next switching (once) by creating 'skip.txt' file inside the folder where you put the EXE. Once skipped, the 'skip.txt' file will be deleted. OR, you can create a 'repeating skip' by creating 'skip.txt' and add these lines:
+```xaml
+3/3
+repeat
+```
+The number '3' above can be any number. The first '3' is the 'remaining value', the second one is the 'number of repeat'. On 'skip.txt' creation, you should set 'remaining value' with the same value with the 'number of repeat' value.
+'Repeating skip' is useful if you want to switch theme every X startup, instead of every startup.
 
 ### Exclusion
 In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
@@ -67,7 +78,8 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
 
 ### Launch from Command Prompt
-Yes, you can launch KAWAII Theme Switcher via Command Prompt!
+- Yes, you can launch KAWAII Theme Switcher via Command Prompt!
+- BUT! You can't use all 'extra features' mentioned above, since all .txt files will be ignored.
 
 #### How To
 ```xaml
