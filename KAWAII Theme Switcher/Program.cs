@@ -85,6 +85,7 @@ namespace KAWAII_Theme_Switcher
             {
                 int exitDelay = 1500;
                 RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                var valName = AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
                 if (File.Exists(Environment.CurrentDirectory + "\\startup.txt"))
                 {
                     int startupDelay = -3;
@@ -102,18 +103,11 @@ namespace KAWAII_Theme_Switcher
                         exitDelay = 1500;
                     }
                     
-                    rk.SetValue(AppDomain.CurrentDomain.FriendlyName, Application.ExecutablePath);
-
-                    //// Create shortcut on startup folder
-                    //IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
-                    //string shortcutAddress = startupFolder + @"\KAWAII Theme Switcher.lnk";
-                    //IWshRuntimeLibrary.IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutAddress);
-                    //shortcut.Description = "Shortcut for KAWAII Theme Switcher"; // description of the shortcut
-                    //shortcut.WorkingDirectory = Application.StartupPath; /* working directory */
-                    //shortcut.TargetPath = Application.ExecutablePath; /* path of the executable */
-                    //shortcut.Arguments = "/a /c";
-                    //shortcut.Save(); // save the shortcut 
-
+                    if (rk.GetValue(valName) == null)
+                    {
+                        rk.SetValue(valName, Application.ExecutablePath);
+                    }
+                   
                     if (startupDelay <= -1)
                     {
                         using (System.Diagnostics.PerformanceCounter cpu = new System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total"))
@@ -142,11 +136,9 @@ namespace KAWAII_Theme_Switcher
                 }
                 else
                 {
-                    //if (File.Exists(startupFolder + @"\KAWAII Theme Switcher.lnk"))
-                    //{
-                    //    File.Delete(startupFolder + @"\KAWAII Theme Switcher.lnk");
-                    //}
-                    rk.DeleteValue(AppDomain.CurrentDomain.FriendlyName, false);
+                    if (rk.GetValue(valName) != null) {
+                        rk.DeleteValue(valName, false);
+                    }
                 }
 
                 if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
@@ -184,7 +176,6 @@ namespace KAWAII_Theme_Switcher
                     }
                     else
                     {
-
                         if (rem > 0)
                         {
                             rem--;
