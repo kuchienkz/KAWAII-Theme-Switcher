@@ -5,7 +5,7 @@
  * 
  * or whatever.
  * 
- * I don't give a fuck, as long as you leave this notice when distributing it.
+ * I don't give a fuck, as long as you leave this notice AS IT IS when distributing it.
  * 
  * 
  * 
