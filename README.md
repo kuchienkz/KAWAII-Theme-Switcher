@@ -52,7 +52,8 @@ You can skip next switching (once) by creating 'skip.txt' file inside the folder
 3/3
 repeat
 ```
-This is useful if you want to switch theme every X startup, instead of every startup.
+The number '3' above can be any number. The first '3' is the 'remaining value', the second one is the 'number of repeat'. On 'skip.txt' creation, you should set 'remaining value' with the same value with the 'number of repeat' value.
+'Repeating skip' is useful if you want to switch theme every X startup, instead of every startup.
 
 ### Exclusion
 In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
