@@ -26,18 +26,22 @@ using static KAWAII_Theme_Switcher.MyExtensions;
 
 namespace KAWAII_Theme_Switcher
 {
-    static class Program
+    public static class Program
     {
         private static string[] _exclude;
         private static string windir = Environment.GetEnvironmentVariable("windir");
+        public static List<string> log = new List<string>();
 
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
         static void Main(string[] args)
         {
             var path = "";
-
+            log.Add("[" + DateTime.Now.ToLongDateString() + "]");
+            log.Add("Environtment directory: " + Environment.CurrentDirectory);
             if (args.Length > 1)
             {
+                log.Add("_Using Command Prompt mode...");
+                log.Add("__Command: " + String.Join(" ", args));
                 if (!args[1].Equals(""))
                 {
                     if (File.Exists(args[1]) && Path.GetExtension(args[1]).Equals(".theme"))
@@ -59,7 +63,6 @@ namespace KAWAII_Theme_Switcher
                         }
                     }
                 }
-                
                 if (args.Length > 2)
                 {
                     if (File.Exists(args[2]) && Path.GetExtension(args[1]).EqualsIgnoreCase(".jpg"))
@@ -83,13 +86,16 @@ namespace KAWAII_Theme_Switcher
             }
             else
             {
+                log.Add("_Using Standard mode...");
                 int exitDelay = 1500;
                 RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 var valName = AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
                 if (File.Exists(Environment.CurrentDirectory + "\\startup.txt"))
                 {
+                    log.Add("__startup.txt found!");
                     int startupDelay = -3;
                     var startupParams = File.ReadAllLines(Environment.CurrentDirectory + "\\startup.txt").Where(a => !a.Replace(" ", "").Equals("")).ToArray();
+                    log.Add("__Startup params: " + String.Join(" | ", startupParams));
                     if (startupParams.Count() > 0 && !int.TryParse(startupParams[0].RegexReplace(@"[a-z_ :=]", "", -1), out startupDelay))
                     {
                         startupDelay = -3;
@@ -105,11 +111,13 @@ namespace KAWAII_Theme_Switcher
                     
                     if (rk.GetValue(valName) == null)
                     {
+                        log.Add("___Startup registry NOT found! Creating new registry...");
                         rk.SetValue(valName, Application.ExecutablePath);
                     }
                    
                     if (startupDelay <= -1)
                     {
+                        log.Add("___Using Smart Delay...");
                         using (System.Diagnostics.PerformanceCounter cpu = new System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total"))
                         {
                             int hits = 0;
@@ -136,50 +144,69 @@ namespace KAWAII_Theme_Switcher
                 }
                 else
                 {
+                    log.Add("__startup.txt NOT found!");
                     if (rk.GetValue(valName) != null) {
+                        log.Add("___Startup registry found! Deleting registry...");
                         rk.DeleteValue(valName, false);
                     }
                 }
 
                 if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
                 {
+                    log.Add("__skip.txt found!");
                     if (File.ReadAllText(Environment.CurrentDirectory + "\\skip.txt").Replace(" ", "").Equals(""))
                     {
+                        log.Add("___Using 'skip once', deleting skip.txt...");
                         File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+                        log.Add("___END");
+                        log.Add("");
+                        File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
                         return;
                     }
 
                     var lns = File.ReadAllLines(Environment.CurrentDirectory + "\\skip.txt");
                     File.Delete(Environment.CurrentDirectory + "\\skip.txt");
-
+                    log.Add("__Skip params: " + string.Join(" | ", lns));
                     int rem = int.Parse(lns[0].Replace(" ", "").Split('/')[0]);
                     if (lns.Length == 2)
                     {
                         if (rem <= 0)
                         {
+                            log.Add("___Remaining skip has reached Zero! Changing theme...");
                             if (lns[1].Replace(" ", "").Equals("repeat", StringComparison.OrdinalIgnoreCase) || Equals("true", StringComparison.OrdinalIgnoreCase))
                             {
+                                log.Add("____'Repeating Skip' enabled!");
                                 rem = int.Parse(lns[0].Replace(" ", "").Split('/')[1]);
                                 File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + rem, "repeat" });
                             }
                         }
                         else
                         {
+                            log.Add("___Remaining skip is " + rem + ", skipping current switch!");
                             rem--;
                             File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
                             if (lns[1].Replace(" ", "").Equals("repeat", StringComparison.OrdinalIgnoreCase) || Equals("true", StringComparison.OrdinalIgnoreCase))
                             {
+                                log.Add("____'Repeating Skip' enabled!");
                                 File.AppendAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { "repeat" });
                             }
+                            log.Add("___END");
+                            log.Add("");
+                            File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
                             return;
                         }
                     }
                     else
                     {
+                        log.Add("___Skip using only 1 parameter!");
                         if (rem > 0)
                         {
+                            log.Add("____Remaining skip is " + rem + ", skipping current switch!");
                             rem--;
                             File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
+                            log.Add("____END");
+                            log.Add("");
+                            File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
                             return;
                         }
                     }
@@ -188,7 +215,9 @@ namespace KAWAII_Theme_Switcher
                 //Load Exclusion
                 if (File.Exists(Environment.CurrentDirectory + "\\exclusion.txt"))
                 {
+                    log.Add("__exclusion.txt found! Loading exclusion...");
                     _exclude = ReadAllLines(Environment.CurrentDirectory + "\\exclusion.txt").ToArray();
+                    log.Add("__Exclusion count: " + _exclude.Count());
                 }
 
                 //Get latest list for checking new Themes
@@ -297,7 +326,11 @@ namespace KAWAII_Theme_Switcher
 
                 // Apply Theme/Visual Style
                 KAWAII_Theme_Helper.ApplyTheme(path, exitDelay);
+
+                log.Add("_END");
+                log.Add("");
             }
+            File.AppendAllLines(@"D:\My Works\Customization\Theme Switcher\logs.txt", log);
         }
 
         static void ChangeLogon(string mode, string[] _exclude, string path, bool commandPrompt = false)

@@ -23,10 +23,11 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static KAWAII_Theme_Switcher.Program;
 
 namespace KAWAII_Theme_Switcher
 {
-    static class KAWAII_Theme_Helper
+    public static class KAWAII_Theme_Helper
     {
         private static string windir = Environment.GetEnvironmentVariable("windir");
 
@@ -164,12 +165,15 @@ namespace KAWAII_Theme_Switcher
                             continue;
                         }
                         TCSound = GetSoundLength(l.RegexReplace(@"%systemroot%", @"C:\Windows", 1));
+                        log.Add("_Theme Change Sound found! Duration: " + TCSound + " milliseconds");
+                        break;
                     }
                 }
             }
             SetSystemVisualStyle(msstylePath, color, size, 0);
             ChangeTheme(themePath);
             TCSound = TCSound < 1500 ? 1500 : TCSound;
+            log.Add("_Waiting for sound to finish: " + (TCSound + exitDelay) + " milliseconds");
             Task.Factory.StartNew(() => Thread.Sleep(TCSound + exitDelay)).Wait();
         }
 
