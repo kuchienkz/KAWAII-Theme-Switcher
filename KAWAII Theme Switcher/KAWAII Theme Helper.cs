@@ -5,7 +5,7 @@
  * 
  * or whatever.
  * 
- * I don't give a fuck, as long as you leave this notice when distributing it.
+ * I don't give a fuck, as long as you leave this notice AS IT IS when distributing it.
  * 
  * 
  * 
@@ -29,7 +29,7 @@ namespace KAWAII_Theme_Switcher
 {
     public static class KAWAII_Theme_Helper
     {
-        private static string windir = Environment.GetEnvironmentVariable("windir");
+        public static readonly string windir = Environment.GetEnvironmentVariable("windir");
 
         [DllImport("UxTheme.Dll", EntryPoint = "#65", CharSet = CharSet.Unicode)]
         private static extern int SetSystemVisualStyle(string pszFilename, string pszColor, string pszSize, int dwReserved);

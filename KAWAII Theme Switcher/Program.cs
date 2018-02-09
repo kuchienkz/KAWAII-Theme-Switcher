@@ -23,13 +23,14 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Windows.Forms;
 using static KAWAII_Theme_Switcher.MyExtensions;
+using static KAWAII_Theme_Switcher.KAWAII_Theme_Helper;
 
 namespace KAWAII_Theme_Switcher
 {
     public static class Program
     {
         private static string[] _exclude;
-        private static string windir = Environment.GetEnvironmentVariable("windir");
+        private static readonly string appFolder = AppDomain.CurrentDomain.BaseDirectory;
         public static List<string> log = new List<string>();
 
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
@@ -37,7 +38,7 @@ namespace KAWAII_Theme_Switcher
         {
             var path = "";
             log.Add("[" + DateTime.Now.ToLongDateString() + "]");
-            log.Add("Environtment directory: " + Environment.CurrentDirectory);
+            log.Add("Environtment directory: " + appFolder);
             if (args.Length > 1)
             {
                 log.Add("_Using Command Prompt mode...");
@@ -90,11 +91,11 @@ namespace KAWAII_Theme_Switcher
                 int exitDelay = 1500;
                 RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 var valName = AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
-                if (File.Exists(Environment.CurrentDirectory + "\\startup.txt"))
+                if (File.Exists(appFolder + "\\startup.txt"))
                 {
                     log.Add("__startup.txt found!");
                     int startupDelay = -3;
-                    var startupParams = File.ReadAllLines(Environment.CurrentDirectory + "\\startup.txt").Where(a => !a.Replace(" ", "").Equals("")).ToArray();
+                    var startupParams = File.ReadAllLines(appFolder + "\\startup.txt").Where(a => !a.Replace(" ", "").Equals("")).ToArray();
                     log.Add("__Startup params: " + String.Join(" | ", startupParams));
                     if (startupParams.Count() > 0 && !int.TryParse(startupParams[0].RegexReplace(@"[a-z_ :=]", "", -1), out startupDelay))
                     {
@@ -151,21 +152,21 @@ namespace KAWAII_Theme_Switcher
                     }
                 }
 
-                if (File.Exists(Environment.CurrentDirectory + "\\skip.txt"))
+                if (File.Exists(appFolder + "\\skip.txt"))
                 {
                     log.Add("__skip.txt found!");
-                    if (File.ReadAllText(Environment.CurrentDirectory + "\\skip.txt").Replace(" ", "").Equals(""))
+                    if (File.ReadAllText(appFolder + "\\skip.txt").Replace(" ", "").Equals(""))
                     {
                         log.Add("___Using 'skip once', deleting skip.txt...");
-                        File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+                        File.Delete(appFolder + "\\skip.txt");
                         log.Add("___END");
                         log.Add("");
-                        File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
+                        File.AppendAllLines(appFolder + "\\logs.txt", log);
                         return;
                     }
 
-                    var lns = File.ReadAllLines(Environment.CurrentDirectory + "\\skip.txt");
-                    File.Delete(Environment.CurrentDirectory + "\\skip.txt");
+                    var lns = File.ReadAllLines(appFolder + "\\skip.txt");
+                    File.Delete(appFolder + "\\skip.txt");
                     log.Add("__Skip params: " + string.Join(" | ", lns));
                     int rem = int.Parse(lns[0].Replace(" ", "").Split('/')[0]);
                     if (lns.Length == 2)
@@ -177,22 +178,22 @@ namespace KAWAII_Theme_Switcher
                             {
                                 log.Add("____'Repeating Skip' enabled!");
                                 rem = int.Parse(lns[0].Replace(" ", "").Split('/')[1]);
-                                File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + rem, "repeat" });
+                                File.WriteAllLines(appFolder + "\\skip.txt", new string[] { rem + "/" + rem, "repeat" });
                             }
                         }
                         else
                         {
                             log.Add("___Remaining skip is " + rem + ", skipping current switch!");
                             rem--;
-                            File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
+                            File.WriteAllLines(appFolder + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
                             if (lns[1].Replace(" ", "").Equals("repeat", StringComparison.OrdinalIgnoreCase) || Equals("true", StringComparison.OrdinalIgnoreCase))
                             {
                                 log.Add("____'Repeating Skip' enabled!");
-                                File.AppendAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { "repeat" });
+                                File.AppendAllLines(appFolder + "\\skip.txt", new string[] { "repeat" });
                             }
                             log.Add("___END");
                             log.Add("");
-                            File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
+                            File.AppendAllLines(appFolder + "\\logs.txt", log);
                             return;
                         }
                     }
@@ -203,20 +204,20 @@ namespace KAWAII_Theme_Switcher
                         {
                             log.Add("____Remaining skip is " + rem + ", skipping current switch!");
                             rem--;
-                            File.WriteAllLines(Environment.CurrentDirectory + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
+                            File.WriteAllLines(appFolder + "\\skip.txt", new string[] { rem + "/" + lns[0].Replace(" ", "").Split('/')[1] });
                             log.Add("____END");
                             log.Add("");
-                            File.AppendAllLines(Environment.CurrentDirectory + "\\logs.txt", log);
+                            File.AppendAllLines(appFolder + "\\logs.txt", log);
                             return;
                         }
                     }
                 }
 
                 //Load Exclusion
-                if (File.Exists(Environment.CurrentDirectory + "\\exclusion.txt"))
+                if (File.Exists(appFolder + "\\exclusion.txt"))
                 {
                     log.Add("__exclusion.txt found! Loading exclusion...");
-                    _exclude = ReadAllLines(Environment.CurrentDirectory + "\\exclusion.txt").ToArray();
+                    _exclude = ReadAllLines(appFolder + "\\exclusion.txt").ToArray();
                     log.Add("__Exclusion count: " + _exclude.Count());
                 }
 
@@ -228,32 +229,32 @@ namespace KAWAII_Theme_Switcher
                 }
 
                 // Theme selection
-                if (File.Exists(Environment.CurrentDirectory + @"\RSequence.txt"))
+                if (File.Exists(appFolder + @"\RSequence.txt"))
                 {
-                    if (!File.Exists(Environment.CurrentDirectory + @"\loaded.txt"))
+                    if (!File.Exists(appFolder + @"\loaded.txt"))
                     {
-                        File.WriteAllText(Environment.CurrentDirectory + @"\loaded.txt", "");
+                        File.WriteAllText(appFolder + @"\loaded.txt", "");
                     }
-                    var loaded = ReadAllLines(Environment.CurrentDirectory + "\\loaded.txt").ToList();
-                    if (ReadAllLines(Environment.CurrentDirectory + "\\RSequence.txt").Count() <= 0)
+                    var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
+                    if (ReadAllLines(appFolder + "\\RSequence.txt").Count() <= 0)
                     {
                         var rs = latestThemeList.ToList();
                         rs.Shuffle();
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\RSequence.txt", rs);
+                        File.WriteAllLines(appFolder + @"\RSequence.txt", rs);
                     }
                     else
                     {
-                        var queue = ReadAllLines(Environment.CurrentDirectory + "\\RSequence.txt").ToList();
+                        var queue = ReadAllLines(appFolder + "\\RSequence.txt").ToList();
                         var union = loaded.Concat(queue);
                         var newThemes = latestThemeList.Except(union);
                         if (newThemes.Count() > 0)
                         {
                             queue.AddRange(newThemes);
                             queue.Shuffle();
-                            File.WriteAllLines(Environment.CurrentDirectory + @"\RSequence.txt", queue);
+                            File.WriteAllLines(appFolder + @"\RSequence.txt", queue);
                         }
                     }
-                    var lrse = ReadAllLines(Environment.CurrentDirectory + "\\RSequence.txt");
+                    var lrse = ReadAllLines(appFolder + "\\RSequence.txt");
                     if (_exclude != null && _exclude.Count() > 0)
                     {
                         lrse = lrse.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a)));
@@ -261,35 +262,35 @@ namespace KAWAII_Theme_Switcher
                     var rse = new Queue<string>(lrse);
                     path = rse.Dequeue();
                     loaded.Add(path);
-                    File.WriteAllLines(Environment.CurrentDirectory + @"\loaded.txt", loaded);
-                    File.WriteAllLines(Environment.CurrentDirectory + @"\RSequence.txt", rse);
+                    File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                    File.WriteAllLines(appFolder + @"\RSequence.txt", rse);
                 }
-                else if (File.Exists(Environment.CurrentDirectory + @"\Sequence.txt"))
+                else if (File.Exists(appFolder + @"\Sequence.txt"))
                 {
-                    if (!File.Exists(Environment.CurrentDirectory + @"\loaded.txt"))
+                    if (!File.Exists(appFolder + @"\loaded.txt"))
                     {
-                        File.WriteAllText(Environment.CurrentDirectory + @"\loaded.txt", "");
+                        File.WriteAllText(appFolder + @"\loaded.txt", "");
                     }
-                    var loaded = ReadAllLines(Environment.CurrentDirectory + "\\loaded.txt").ToList();
-                    if (ReadAllLines(Environment.CurrentDirectory + "\\Sequence.txt").Count() <= 0)
+                    var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
+                    if (ReadAllLines(appFolder + "\\Sequence.txt").Count() <= 0)
                     {
                         var rs = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
                         rs = rs.OrderBy(a => a).ToList();
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\Sequence.txt", rs);
+                        File.WriteAllLines(appFolder + @"\Sequence.txt", rs);
                     }
                     else
                     {
-                        var queue = ReadAllLines(Environment.CurrentDirectory + "\\Sequence.txt").ToList();
+                        var queue = ReadAllLines(appFolder + "\\Sequence.txt").ToList();
                         var union = loaded.Concat(queue);
                         var newThemes = latestThemeList.Except(union);
                         if (newThemes.Count() > 0)
                         {
                             queue.AddRange(newThemes);
                             queue = queue.OrderBy(a => a).ToList();
-                            File.WriteAllLines(Environment.CurrentDirectory + @"\Sequence.txt", queue);
+                            File.WriteAllLines(appFolder + @"\Sequence.txt", queue);
                         }
                     }
-                    var lrse = ReadAllLines(Environment.CurrentDirectory + "\\Sequence.txt");
+                    var lrse = ReadAllLines(appFolder + "\\Sequence.txt");
                     if (_exclude != null && _exclude.Count() > 0)
                     {
                         lrse = lrse.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a)));
@@ -297,14 +298,14 @@ namespace KAWAII_Theme_Switcher
                     var rse = new Queue<string>(lrse);
                     path = rse.Dequeue();
                     loaded.Add(path);
-                    File.WriteAllLines(Environment.CurrentDirectory + @"\loaded.txt", loaded);
-                    File.WriteAllLines(Environment.CurrentDirectory + @"\Sequence.txt", rse);
+                    File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                    File.WriteAllLines(appFolder + @"\Sequence.txt", rse);
                 }
                 else
                 {
-                    if (File.Exists(Environment.CurrentDirectory + @"\loaded.txt"))
+                    if (File.Exists(appFolder + @"\loaded.txt"))
                     {
-                        File.Delete(Environment.CurrentDirectory + @"\loaded.txt");
+                        File.Delete(appFolder + @"\loaded.txt");
                     }
                     path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
                     while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
@@ -314,9 +315,9 @@ namespace KAWAII_Theme_Switcher
                 }
 
                 // Logon Modifier
-                if (File.Exists(Environment.CurrentDirectory + @"\logon.txt"))
+                if (File.Exists(appFolder + @"\logon.txt"))
                 {
-                    var prms = File.ReadAllLines(Environment.CurrentDirectory + "\\logon.txt").ToList();
+                    var prms = File.ReadAllLines(appFolder + "\\logon.txt").ToList();
                     if (prms.Count == 0)
                     {
                         prms.Add("respective");
@@ -348,37 +349,37 @@ namespace KAWAII_Theme_Switcher
                 {
                     if (mode.Equals("random") || mode.Equals("r"))
                     {
-                        if (commandPrompt == false && File.Exists(Environment.CurrentDirectory + "\\logon.used"))
+                        if (commandPrompt == false && File.Exists(appFolder + "\\logon.used"))
                         {
-                            File.Delete(Environment.CurrentDirectory + "\\logon.used");
+                            File.Delete(appFolder + "\\logon.used");
                         }
                         KAWAII_Theme_Helper.ChangeLogonBackground(logons[ThreadSafeRandom.ThisThreadsRandom.Next(0, logons.Count() - 1)]);
                     }
                     else if (mode.Equals("sequence") || mode.Equals("s"))
                     {
-                        if (!File.Exists(Environment.CurrentDirectory + "\\logon.used"))
+                        if (!File.Exists(appFolder + "\\logon.used"))
                         {
-                            File.WriteAllText(Environment.CurrentDirectory + "\\logon.used", "");
+                            File.WriteAllText(appFolder + "\\logon.used", "");
                         }
-                        var loaded = ReadAllLines(Environment.CurrentDirectory + "\\logon.used").ToList();
-                        if (!File.Exists(Environment.CurrentDirectory + @"\logon.seq") || ReadAllLines(Environment.CurrentDirectory + @"\logon.seq").Count() <= 0)
+                        var loaded = ReadAllLines(appFolder + "\\logon.used").ToList();
+                        if (!File.Exists(appFolder + @"\logon.seq") || ReadAllLines(appFolder + @"\logon.seq").Count() <= 0)
                         {
                             logons = logons.OrderBy(a => a).ToList();
-                            File.WriteAllLines(Environment.CurrentDirectory + @"\logon.seq", logons);
+                            File.WriteAllLines(appFolder + @"\logon.seq", logons);
                         }
                         else
                         {
-                            var queue = ReadAllLines(Environment.CurrentDirectory + "\\logon.seq").ToList();
+                            var queue = ReadAllLines(appFolder + "\\logon.seq").ToList();
                             var union = loaded.Concat(queue);
                             var newLogons = logons.Except(union);
                             if (newLogons.Count() > 0)
                             {
                                 queue.AddRange(newLogons);
                                 queue.OrderBy(a => a).ToList();
-                                File.WriteAllLines(Environment.CurrentDirectory + @"\logon.seq", queue);
+                                File.WriteAllLines(appFolder + @"\logon.seq", queue);
                             }
                         }
-                        var seq = ReadAllLines(Environment.CurrentDirectory + @"\logon.seq");
+                        var seq = ReadAllLines(appFolder + @"\logon.seq");
                         if (_exclude != null && _exclude.Count() > 0)
                         {
                             seq = seq.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\")));
@@ -386,35 +387,35 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(seq);
                         var lg = rse.Dequeue();
                         loaded.Add(lg);
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\logon.used", loaded);
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\logon.seq", rse);
+                        File.WriteAllLines(appFolder + @"\logon.used", loaded);
+                        File.WriteAllLines(appFolder + @"\logon.seq", rse);
                         KAWAII_Theme_Helper.ChangeLogonBackground(lg);
                     }
                     else if (mode.Equals("random sequence") || mode.Equals("rs"))
                     {
-                        if (!File.Exists(Environment.CurrentDirectory + "\\logon.used"))
+                        if (!File.Exists(appFolder + "\\logon.used"))
                         {
-                            File.WriteAllText(Environment.CurrentDirectory + "\\logon.used", "");
+                            File.WriteAllText(appFolder + "\\logon.used", "");
                         }
-                        var loaded = ReadAllLines(Environment.CurrentDirectory + "\\logon.used").ToList(); ;
-                        if (!File.Exists(Environment.CurrentDirectory + @"\logon.rseq") || ReadAllLines(Environment.CurrentDirectory + @"\logon.rseq").Count() <= 0)
+                        var loaded = ReadAllLines(appFolder + "\\logon.used").ToList(); ;
+                        if (!File.Exists(appFolder + @"\logon.rseq") || ReadAllLines(appFolder + @"\logon.rseq").Count() <= 0)
                         {
                             logons.Shuffle();
-                            File.WriteAllLines(Environment.CurrentDirectory + @"\logon.rseq", logons);
+                            File.WriteAllLines(appFolder + @"\logon.rseq", logons);
                         }
                         else
                         {
-                            var queue = ReadAllLines(Environment.CurrentDirectory + "\\logon.rseq").ToList();
+                            var queue = ReadAllLines(appFolder + "\\logon.rseq").ToList();
                             var union = loaded.Concat(queue);
                             var newLogons = logons.Except(union);
                             if (newLogons.Count() > 0)
                             {
                                 queue.AddRange(newLogons);
                                 queue.Shuffle();
-                                File.WriteAllLines(Environment.CurrentDirectory + @"\logon.rseq", queue);
+                                File.WriteAllLines(appFolder + @"\logon.rseq", queue);
                             }
                         }
-                        var seq = ReadAllLines(Environment.CurrentDirectory + @"\logon.rseq");
+                        var seq = ReadAllLines(appFolder + @"\logon.rseq");
                         if (_exclude != null && _exclude.Count() > 0)
                         {
                             seq = seq.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\")));
@@ -422,15 +423,15 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(seq);
                         var lg = rse.Dequeue();
                         loaded.Add(lg);
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\logon.used", loaded);
-                        File.WriteAllLines(Environment.CurrentDirectory + @"\logon.rseq", rse);
+                        File.WriteAllLines(appFolder + @"\logon.used", loaded);
+                        File.WriteAllLines(appFolder + @"\logon.rseq", rse);
                         KAWAII_Theme_Helper.ChangeLogonBackground(lg);
                     }
                     else // Respective mode
                     {
-                        if (commandPrompt == false && File.Exists(Environment.CurrentDirectory + "\\logon.used"))
+                        if (commandPrompt == false && File.Exists(appFolder + "\\logon.used"))
                         {
-                            File.Delete(Environment.CurrentDirectory + "\\logon.used");
+                            File.Delete(appFolder + "\\logon.used");
                         }
                         if (Directory.Exists(windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path)))
                         {
