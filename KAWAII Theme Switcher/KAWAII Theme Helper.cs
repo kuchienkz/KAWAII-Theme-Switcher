@@ -5,13 +5,16 @@
  * 
  * or whatever.
  * 
- * I don't give a fuck, as long as you leave this notice AS IT IS when distributing it.
- * 
+ * I don't give a fuck, as long as you leave my name and email AS IT IS when distributing it.
  * 
  * 
  * Originally created by Kuchienkz.
- * 
  * Email: wahyu.darkflame@gmail.com
+ * 
+ * 
+ * Other Contributors:
+ * [your name here]
+ * 
  */
 
 using Microsoft.Win32;
