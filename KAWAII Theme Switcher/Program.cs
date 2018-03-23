@@ -334,7 +334,7 @@ namespace KAWAII_Theme_Switcher
                 log.Add("_END");
                 log.Add("");
             }
-            File.AppendAllLines(@"D:\My Works\Customization\Theme Switcher\logs.txt", log);
+            File.AppendAllLines(appFolder + "\\logs.txt", log);
         }
 
         static void ChangeLogon(string mode, string[] _exclude, string path, bool commandPrompt = false)
