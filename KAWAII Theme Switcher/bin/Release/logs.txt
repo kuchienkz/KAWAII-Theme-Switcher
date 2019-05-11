@@ -1,0 +1,29 @@
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command:  defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command: KAWAII Theme Switcher.exe  defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command: KAWAII Theme Switcher.exe  defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command: KAWAII Theme Switcher.exe  defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command:  defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command:   defaultBG.jpg
+[Saturday, May 11, 2019]
+Environtment directory: E:\My Works\APP Projects\VS Projects\KAWAII Theme Swithcer\KAWAII Theme Switcher\bin\Release\
+_Using Command Prompt mode...
+__Command: KAWAII Theme Switcher.exe  defaultBG.jpg
+___Logon applied: defaultBG.jpg

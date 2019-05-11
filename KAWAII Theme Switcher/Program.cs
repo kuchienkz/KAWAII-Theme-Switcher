@@ -25,8 +25,8 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Threading;
 using System.Windows.Forms;
-using static KAWAII_Theme_Switcher.MyExtensions;
 using static KAWAII_Theme_Switcher.KAWAII_Theme_Helper;
+using static KAWAII_Theme_Switcher.MyExtensions;
 
 namespace KAWAII_Theme_Switcher
 {
@@ -42,22 +42,22 @@ namespace KAWAII_Theme_Switcher
             var path = "";
             log.Add("[" + DateTime.Now.ToLongDateString() + "]");
             log.Add("Environtment directory: " + appFolder);
-            if (args.Length > 1)
+            if (args.Length > 0)
             {
                 log.Add("_Using Command Prompt mode...");
                 log.Add("__Command: " + String.Join(" ", args));
-                if (!args[1].Equals(""))
+                if (!args[0].Equals(""))
                 {
-                    if (File.Exists(args[1]) && Path.GetExtension(args[1]).Equals(".theme"))
+                    if (File.Exists(args[0]) && Path.GetExtension(args[0]).Equals(".theme"))
                     {
-                        path = args[1];
+                        path = args[0];
                     }
-                    else if (File.Exists(windir + @"\Resources\Themes\" + args[1] + ".theme") || File.Exists(windir + @"\Resources\Themes\" + args[1]))
+                    else if (File.Exists(windir + @"\Resources\Themes\" + args[0] + ".theme") || File.Exists(windir + @"\Resources\Themes\" + args[0]))
                     {
-                        path = windir + @"\Resources\Themes\" + args[1] + ".theme";
+                        path = windir + @"\Resources\Themes\" + args[0] + ".theme";
                         path = path.Replace(".theme.theme", ".theme");
                     }
-                    else if (args[1].EqualsIgnoreCase("random"))
+                    else if (args[0].EqualsIgnoreCase("random"))
                     {
                         var themeList = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
                         path = themeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, themeList.Count() - 1)];
@@ -67,17 +67,26 @@ namespace KAWAII_Theme_Switcher
                         }
                     }
                 }
-                if (args.Length > 2)
+                if (args.Length > 1)
                 {
-                    if (File.Exists(args[2]) && Path.GetExtension(args[1]).EqualsIgnoreCase(".jpg"))
+                    if (Path.GetExtension(args[1]).EqualsIgnoreCase(".jpg"))
                     {
-                        KAWAII_Theme_Helper.ChangeLogonBackground(args[2]);
+                        if (File.Exists(args[1]))
+                        {
+                            KAWAII_Theme_Helper.ChangeLogonBackground(args[1]);
+                            log.Add("___Logon applied: " + args[1]);
+                        }
+                        else if (File.Exists(appFolder + "\\" + args[1]))
+                        {
+                            KAWAII_Theme_Helper.ChangeLogonBackground(appFolder + "\\" + args[1]);
+                            log.Add("___Logon applied: " + args[1]);
+                        }
                     }
-                    else if (args[2].EqualsIgnoreCase("random"))
+                    else if (args[1].EqualsIgnoreCase("random"))
                     {
                         ChangeLogon("random", _exclude, "", true);
                     }
-                    else if (!path.Equals("") && !args[2].Equals(""))
+                    else if (!path.Equals("") && !args[1].Equals(""))
                     {
                         ChangeLogon("respective", _exclude, path, true);
                     }
@@ -86,7 +95,9 @@ namespace KAWAII_Theme_Switcher
                 if (!path.Equals(""))
                 {
                     KAWAII_Theme_Helper.ApplyTheme(path);
+                    log.Add("___Theme applied: " + path);
                 }
+                log.Add("_END");
             }
             else
             {
@@ -112,13 +123,13 @@ namespace KAWAII_Theme_Switcher
                     {
                         exitDelay = 1500;
                     }
-                    
+
                     if (rk.GetValue(valName) == null)
                     {
                         log.Add("___Startup registry NOT found! Creating new registry...");
                         rk.SetValue(valName, Application.ExecutablePath);
                     }
-                   
+
                     if (startupDelay <= -1)
                     {
                         log.Add("___Using Smart Delay...");
@@ -149,7 +160,8 @@ namespace KAWAII_Theme_Switcher
                 else
                 {
                     log.Add("__startup.txt NOT found!");
-                    if (rk.GetValue(valName) != null) {
+                    if (rk.GetValue(valName) != null)
+                    {
                         log.Add("___Startup registry found! Deleting registry...");
                         rk.DeleteValue(valName, false);
                     }
@@ -214,6 +226,12 @@ namespace KAWAII_Theme_Switcher
                             return;
                         }
                     }
+                }
+
+                if (File.Exists(appFolder + "\\safetheme.txt"))
+                {
+                    log.Add("__safetheme.txt found! Asking for switching...");
+
                 }
 
                 //Load Exclusion
@@ -311,7 +329,7 @@ namespace KAWAII_Theme_Switcher
                         File.Delete(appFolder + @"\loaded.txt");
                     }
                     path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
-                    while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
+                    while (Path.GetFileNameWithoutExtension(path) == GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == GetCurrentVisualStyleName())
                     {
                         path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
                     }
@@ -330,6 +348,7 @@ namespace KAWAII_Theme_Switcher
 
                 // Apply Theme/Visual Style
                 KAWAII_Theme_Helper.ApplyTheme(path, exitDelay);
+                log.Add("___Theme applied: " + path);
 
                 log.Add("_END");
                 log.Add("");
@@ -356,7 +375,9 @@ namespace KAWAII_Theme_Switcher
                         {
                             File.Delete(appFolder + "\\logon.used");
                         }
-                        KAWAII_Theme_Helper.ChangeLogonBackground(logons[ThreadSafeRandom.ThisThreadsRandom.Next(0, logons.Count() - 1)]);
+                        var s = logons[ThreadSafeRandom.ThisThreadsRandom.Next(0, logons.Count() - 1)];
+                        KAWAII_Theme_Helper.ChangeLogonBackground(s);
+                        log.Add("___Logon applied: " + s);
                     }
                     else if (mode.Equals("sequence") || mode.Equals("s"))
                     {
@@ -393,6 +414,7 @@ namespace KAWAII_Theme_Switcher
                         File.WriteAllLines(appFolder + @"\logon.used", loaded);
                         File.WriteAllLines(appFolder + @"\logon.seq", rse);
                         KAWAII_Theme_Helper.ChangeLogonBackground(lg);
+                        log.Add("___Logon applied: " + lg);
                     }
                     else if (mode.Equals("random sequence") || mode.Equals("rs"))
                     {
@@ -429,6 +451,7 @@ namespace KAWAII_Theme_Switcher
                         File.WriteAllLines(appFolder + @"\logon.used", loaded);
                         File.WriteAllLines(appFolder + @"\logon.rseq", rse);
                         KAWAII_Theme_Helper.ChangeLogonBackground(lg);
+                        log.Add("___Logon applied: " + lg);
                     }
                     else // Respective mode
                     {
@@ -442,6 +465,7 @@ namespace KAWAII_Theme_Switcher
                             if (files.Count() > 0)
                             {
                                 KAWAII_Theme_Helper.ChangeLogonBackground(files[0]);
+                                log.Add("___Logon applied: " + files[0]);
                             }
                         }
                     }
@@ -449,7 +473,7 @@ namespace KAWAII_Theme_Switcher
             }
         }
     }
-    
+
     static class ThreadSafeRandom
     {
         [ThreadStatic] private static Random Local;
@@ -491,5 +515,5 @@ namespace KAWAII_Theme_Switcher
             }
         }
     }
-    
+
 }

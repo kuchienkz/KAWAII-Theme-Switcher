@@ -202,6 +202,7 @@ namespace KAWAII_Theme_Switcher
         {
             if (!File.Exists(jpegFilename) || new FileInfo(jpegFilename).Length > 256000)
             {
+                Console.WriteLine("Cant change logon background! Image file must be JPG with size no more than 256 KB.");
                 return;
             }
 
