@@ -1,8 +1,8 @@
 # KAWAII Theme Switcher
 A small tool for Windows Theme enthusiast. Now support Windows 10 !!!
 
-Use this app to switch between Windows themes with just One click! Plus, without showing any dialog! Yup. 
-KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
+Use this app to switch between Windows themes with just One click! 
+KTS (in shorts), will scan your /Resources folder for .theme files and save each file's path for later.
 
 ## Main Features
 * Small, kawaii file size.
