@@ -7,6 +7,7 @@
  * 
  * I don't give a fuck, as long as you leave my name and email AS IT IS when distributing it.
  * 
+ * ALSO, KEEP IT FREE!!!
  * 
  * Originally created by Kuchienkz.
  * Email: wahyu.darkflame@gmail.com
@@ -19,6 +20,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -177,7 +179,7 @@ namespace KAWAII_Theme_Switcher
             ChangeTheme(themePath);
             TCSound = TCSound < 1500 ? 1500 : TCSound;
             log.Add("_Waiting for sound to finish: " + (TCSound + exitDelay) + " milliseconds");
-            Task.Factory.StartNew(() => Thread.Sleep(TCSound + exitDelay)).Wait();
+            Task.Run(() => Thread.Sleep(TCSound + exitDelay)).Wait();
         }
 
         [PermissionSet(SecurityAction.LinkDemand)]
@@ -198,29 +200,67 @@ namespace KAWAII_Theme_Switcher
         }
 
         // Logon Stuff
-        public static void ChangeLogonBackground(string jpegFilename)
+        public static void ChangeLogonBackground(string jpegFilename, bool isWindows10 = true)
         {
-            if (!File.Exists(jpegFilename) || new FileInfo(jpegFilename).Length > 256000)
+            if (!File.Exists(jpegFilename))
             {
-                Console.WriteLine("Cant change logon background! Image file must be JPG with size no more than 256 KB.");
+                Console.WriteLine("Cant change lock screen background! Image file doesnt exists: " + jpegFilename);
                 return;
             }
 
-            var regChk = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI\\Background");
-            if (regChk.GetValue("OEMBackground") == null || (int)regChk.GetValue("OEMBackground") == 0)
+            if (isWindows10)
             {
-                Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI\\Background").SetValue("OEMBackground", 1);
-            }
+                var command = $@"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
+Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
+Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData\S-1-5-18\ReadOnly`"" /reset /T"" -NoNewWindow -Wait
+Remove-Item -Path ""$env:programdata\Microsoft\Windows\SystemData\S-1-5-18\ReadOnly\LockScreen_Z\*"" -Force
+Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList ""/F `""$env:systemroot\Web\Screen`"" /R /A /D Y"" -NoNewWindow -Wait
+Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:systemroot\Web\Screen`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
+Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:systemroot\Web\Screen`"" /reset /T"" -NoNewWindow -Wait
+Copy-Item -Path ""$env:systemroot\Web\Screen\img100.jpg"" -Destination ""$env:systemroot\Web\Screen\img200.jpg"" -Force
+Copy-Item -Path ""{jpegFilename}"" -Destination ""$env:systemroot\Web\Screen\img100.jpg"" -Force";
 
-            if (!Directory.Exists(windir + "\\System32\\oobe\\Info\\Backgrounds"))
-            {
-                Directory.CreateDirectory(windir + "\\System32\\oobe\\Info\\Backgrounds");
+                var psCommandBytes = System.Text.Encoding.Unicode.GetBytes(command);
+                var psCommandBase64 = Convert.ToBase64String(psCommandBytes);
+
+                var startInfo = new ProcessStartInfo()
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-NoProfile -ExecutionPolicy unrestricted -EncodedCommand {psCommandBase64}",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+                var p = new Process();
+                p.StartInfo = startInfo;
+                p.Start();
             }
-            if (File.Exists(windir + "\\System32\\oobe\\info\\backgrounds\\backgroundDefault.jpg"))
+            else
             {
-                File.Delete(windir + "\\System32\\oobe\\info\\backgrounds\\backgroundDefault.jpg");
+                // Windows 7
+
+                if (new FileInfo(jpegFilename).Length > 256000)
+                {
+                    Console.WriteLine("Cant change logon background! Image file must be JPG with size no more than 256 KB.");
+                    return;
+                }
+
+                var regChk = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI\\Background");
+                if (regChk.GetValue("OEMBackground") == null || (int)regChk.GetValue("OEMBackground") == 0)
+                {
+                    Registry.LocalMachine.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI\\Background").SetValue("OEMBackground", 1);
+                }
+
+                if (!Directory.Exists(windir + "\\System32\\oobe\\Info\\Backgrounds"))
+                {
+                    Directory.CreateDirectory(windir + "\\System32\\oobe\\Info\\Backgrounds");
+                }
+                if (File.Exists(windir + "\\System32\\oobe\\info\\backgrounds\\backgroundDefault.jpg"))
+                {
+                    File.Delete(windir + "\\System32\\oobe\\info\\backgrounds\\backgroundDefault.jpg");
+                }
+                File.Copy(jpegFilename, windir + "\\System32\\oobe\\Info\\Backgrounds\\backgroundDefault.jpg");
             }
-            File.Copy(jpegFilename, windir + "\\System32\\oobe\\Info\\Backgrounds\\backgroundDefault.jpg");
         }
     }
 }

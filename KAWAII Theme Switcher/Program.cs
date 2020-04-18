@@ -7,6 +7,7 @@
  * 
  * I don't give a fuck, as long as you leave my name and email AS IT IS when distributing it.
  * 
+ * ALSO, KEEP IT FREE!!!
  * 
  * Originally created by Kuchienkz.
  * Email: wahyu.darkflame@gmail.com
@@ -25,7 +26,7 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Threading;
 using System.Windows.Forms;
-using static KAWAII_Theme_Switcher.KAWAII_Theme_Helper;
+
 using static KAWAII_Theme_Switcher.MyExtensions;
 
 namespace KAWAII_Theme_Switcher
@@ -52,14 +53,14 @@ namespace KAWAII_Theme_Switcher
                     {
                         path = args[0];
                     }
-                    else if (File.Exists(windir + @"\Resources\Themes\" + args[0] + ".theme") || File.Exists(windir + @"\Resources\Themes\" + args[0]))
+                    else if (File.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Themes\" + args[0] + ".theme") || File.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Themes\" + args[0]))
                     {
-                        path = windir + @"\Resources\Themes\" + args[0] + ".theme";
+                        path = KAWAII_Theme_Helper.windir + @"\Resources\Themes\" + args[0] + ".theme";
                         path = path.Replace(".theme.theme", ".theme");
                     }
                     else if (args[0].EqualsIgnoreCase("random"))
                     {
-                        var themeList = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
+                        var themeList = new DirectoryInfo(KAWAII_Theme_Helper.windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
                         path = themeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, themeList.Count() - 1)];
                         while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
                         {
@@ -103,6 +104,7 @@ namespace KAWAII_Theme_Switcher
             {
                 log.Add("_Using Standard mode...");
                 int exitDelay = 1500;
+
                 RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 var valName = AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
                 if (File.Exists(appFolder + "\\startup.txt"))
@@ -231,7 +233,7 @@ namespace KAWAII_Theme_Switcher
                 if (File.Exists(appFolder + "\\safetheme.txt"))
                 {
                     log.Add("__safetheme.txt found! Asking for switching...");
-
+                    // TODO
                 }
 
                 //Load Exclusion
@@ -243,10 +245,14 @@ namespace KAWAII_Theme_Switcher
                 }
 
                 //Get latest list for checking new Themes
-                var latestThemeList = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToArray();
+                List<string> latestThemeList = new List<string>();
+                foreach (var d in Directory.GetDirectories(KAWAII_Theme_Helper.windir + @"\Resources"))
+                {
+                    latestThemeList.AddRange(Directory.GetFiles(d, "*.theme", SearchOption.AllDirectories));
+                }
                 if (_exclude != null && _exclude.Count() > 0)
                 {
-                    latestThemeList = latestThemeList.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a))).ToArray();
+                    latestThemeList = latestThemeList.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a))).ToList();
                 }
 
                 // Theme selection
@@ -295,7 +301,7 @@ namespace KAWAII_Theme_Switcher
                     var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
                     if (ReadAllLines(appFolder + "\\Sequence.txt").Count() <= 0)
                     {
-                        var rs = new DirectoryInfo(windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
+                        var rs = new DirectoryInfo(KAWAII_Theme_Helper.windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
                         rs = rs.OrderBy(a => a).ToList();
                         File.WriteAllLines(appFolder + @"\Sequence.txt", rs);
                     }
@@ -329,7 +335,7 @@ namespace KAWAII_Theme_Switcher
                         File.Delete(appFolder + @"\loaded.txt");
                     }
                     path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
-                    while (Path.GetFileNameWithoutExtension(path) == GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == GetCurrentVisualStyleName())
+                    while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
                     {
                         path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
                     }
@@ -358,14 +364,13 @@ namespace KAWAII_Theme_Switcher
 
         static void ChangeLogon(string mode, string[] _exclude, string path, bool commandPrompt = false)
         {
-            string windir = Environment.GetEnvironmentVariable("windir");
             if (_exclude == null)
             {
                 _exclude = new string[0];
             }
-            if (Directory.Exists(windir + @"\Resources\Logon"))
+            if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon"))
             {
-                var logons = Directory.GetFiles(windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories).ToList();
+                var logons = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories).ToList();
                 logons = logons.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\"))).ToList();
                 if (logons.Count() > 0)
                 {
@@ -459,9 +464,9 @@ namespace KAWAII_Theme_Switcher
                         {
                             File.Delete(appFolder + "\\logon.used");
                         }
-                        if (Directory.Exists(windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path)))
+                        if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path)))
                         {
-                            var files = Directory.GetFiles(windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path), "*.jpg", SearchOption.AllDirectories);
+                            var files = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path), "*.jpg", SearchOption.AllDirectories);
                             if (files.Count() > 0)
                             {
                                 KAWAII_Theme_Helper.ChangeLogonBackground(files[0]);
