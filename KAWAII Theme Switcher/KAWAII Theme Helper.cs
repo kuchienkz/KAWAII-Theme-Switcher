@@ -200,15 +200,21 @@ namespace KAWAII_Theme_Switcher
         }
 
         // Logon Stuff
-        public static void ChangeLogonBackground(string jpegFilename, bool isWindows10 = true)
+        public static void ChangeLockscreenBackground(string jpegFilename, WindowsVersion version)
         {
+            if (version == WindowsVersion.UNSUPPORTED)
+            {
+                Console.WriteLine("Windows version currently not supported for changing lock screen background");
+                return;
+            }
+
             if (!File.Exists(jpegFilename))
             {
                 Console.WriteLine("Cant change lock screen background! Image file doesnt exists: " + jpegFilename);
                 return;
             }
 
-            if (isWindows10)
+            if (version == WindowsVersion.WIN10 || version == WindowsVersion.WIN8)
             {
                 var command = $@"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
@@ -235,10 +241,8 @@ Copy-Item -Path ""{jpegFilename}"" -Destination ""$env:systemroot\Web\Screen\img
                 p.StartInfo = startInfo;
                 p.Start();
             }
-            else
+            else if (version == WindowsVersion.WIN7)
             {
-                // Windows 7
-
                 if (new FileInfo(jpegFilename).Length > 256000)
                 {
                     Console.WriteLine("Cant change logon background! Image file must be JPG with size no more than 256 KB.");

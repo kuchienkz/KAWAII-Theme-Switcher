@@ -23,23 +23,38 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Security.Permissions;
 using System.Threading;
 using System.Windows.Forms;
 
-using static KAWAII_Theme_Switcher.MyExtensions;
+using static KAWAII_Theme_Switcher.HelperFunction;
 
 namespace KAWAII_Theme_Switcher
 {
+    public enum WindowsVersion
+    {
+        WIN10,
+        WIN8,
+        WIN7,
+        UNSUPPORTED
+    }
+
     public static class Program
     {
         private static string[] _exclude;
-        private static readonly string appFolder = AppDomain.CurrentDomain.BaseDirectory;
+        private static string appFolder = AppDomain.CurrentDomain.BaseDirectory;
         public static List<string> log = new List<string>();
+        private static WindowsVersion winVer = GetWindowsVersion();
 
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
         static void Main(string[] args)
         {
+            if (appFolder.Last() == '\\')
+            {
+                appFolder = appFolder.Remove(appFolder.Length - 1, 1);
+            }
+
             var path = "";
             log.Add("[" + DateTime.Now.ToLongDateString() + "]");
             log.Add("Environtment directory: " + appFolder);
@@ -74,22 +89,22 @@ namespace KAWAII_Theme_Switcher
                     {
                         if (File.Exists(args[1]))
                         {
-                            KAWAII_Theme_Helper.ChangeLogonBackground(args[1]);
-                            log.Add("___Logon applied: " + args[1]);
+                            KAWAII_Theme_Helper.ChangeLockscreenBackground(args[1], winVer);
+                            log.Add("___Lockscreen applied: " + args[1]);
                         }
                         else if (File.Exists(appFolder + "\\" + args[1]))
                         {
-                            KAWAII_Theme_Helper.ChangeLogonBackground(appFolder + "\\" + args[1]);
-                            log.Add("___Logon applied: " + args[1]);
+                            KAWAII_Theme_Helper.ChangeLockscreenBackground(appFolder + "\\" + args[1], winVer);
+                            log.Add("___Lockscreen applied: " + args[1]);
                         }
                     }
                     else if (args[1].EqualsIgnoreCase("random"))
                     {
-                        ChangeLogon("random", _exclude, "", true);
+                        ChangeLockscreen("random", _exclude, "", true);
                     }
                     else if (!path.Equals("") && !args[1].Equals(""))
                     {
-                        ChangeLogon("respective", _exclude, path, true);
+                        ChangeLockscreen("respective", _exclude, path, true);
                     }
                 }
 
@@ -341,15 +356,15 @@ namespace KAWAII_Theme_Switcher
                     }
                 }
 
-                // Logon Modifier
-                if (File.Exists(appFolder + @"\logon.txt"))
+                // Lockscreen Modifier
+                if (File.Exists(appFolder + @"\lockscreen.txt"))
                 {
-                    var prms = File.ReadAllLines(appFolder + "\\logon.txt").ToList();
+                    var prms = File.ReadAllLines(appFolder + "\\lockscreen.txt").ToList();
                     if (prms.Count == 0)
                     {
                         prms.Add("respective");
                     }
-                    ChangeLogon(prms[0].RegexReplace(@"[a-z_ ]+[:=]{1} ?", "", -1).ToLower(), _exclude, path);
+                    ChangeLockscreen(prms[0].RegexReplace(@"[a-z_ ]+[:=]{1} ?", "", -1).ToLower(), _exclude, path);
                 }
 
                 // Apply Theme/Visual Style
@@ -362,53 +377,136 @@ namespace KAWAII_Theme_Switcher
             File.AppendAllLines(appFolder + "\\logs.txt", log);
         }
 
-        static void ChangeLogon(string mode, string[] _exclude, string path, bool commandPrompt = false)
+        static void SearchForLockscreenBackgrounds(ref List<string> list)
+        {
+            if (Directory.Exists(appFolder + @"\Lockscreen"))
+            {
+                var jpgs = Directory.GetFiles(appFolder + @"\Lockscreen", "*.jpg", SearchOption.AllDirectories);
+                if (jpgs.Length > 0)
+                {
+                    list.AddRange(jpgs);
+                }
+            }
+            if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Lockscreen"))
+            {
+                var jpgs = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Lockscreen", "*.jpg", SearchOption.AllDirectories);
+                if (jpgs.Length > 0)
+                {
+                    list.AddRange(jpgs);
+                }
+            }
+            if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon"))
+            {
+                var jpgs = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories);
+                if (jpgs.Length > 0)
+                {
+                    list.AddRange(jpgs);
+                }
+            }
+
+            if (list.Count == 0 && !Directory.Exists(appFolder + @"\Lockscreen"))
+            {
+                Directory.CreateDirectory(appFolder + @"\Lockscreen");
+                File.WriteAllText(appFolder + "\\Lockscreen\\Put Lock Screen images here.txt",
+                    "When using Respective mode, either put it inside the related theme folder and name it lockscreen.jpg, OR you can put it in this folder but make sure the jpg file has the same name as the theme. Example:" +
+                    "\n\nKagamine Rin.theme" +
+                    "\nKagamine Rin.jpg");
+            }
+            else
+            {
+                if (list.Count > 0 && _exclude != null)
+                    list = list.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\"))).ToList();
+            }
+        }
+
+        static void ChangeLockscreen(string mode, string[] _exclude, string path, bool commandPrompt = false)
         {
             if (_exclude == null)
             {
                 _exclude = new string[0];
             }
-            if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon"))
+
+            var lockscreens = new List<string>();
+            if (mode.EqualsIgnoreCase("respective"))
             {
-                var logons = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories).ToList();
-                logons = logons.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\"))).ToList();
-                if (logons.Count() > 0)
+                if (commandPrompt == false && File.Exists(appFolder + "\\lockscreen.used"))
                 {
-                    if (mode.Equals("random") || mode.Equals("r"))
+                    File.Delete(appFolder + "\\lockscreen.used");
+                }
+
+                var rawpath = File.ReadAllLines(path).DefaultIfEmpty("").FirstOrDefault(l => l.Contains(".msstyles"));
+                if (rawpath.Length > 0)
+                {
+                    var themeDir = Path.GetDirectoryName(Environment.ExpandEnvironmentVariables(rawpath));
+                    if (File.Exists(themeDir + "\\lockscreen.jpg"))
                     {
-                        if (commandPrompt == false && File.Exists(appFolder + "\\logon.used"))
-                        {
-                            File.Delete(appFolder + "\\logon.used");
-                        }
-                        var s = logons[ThreadSafeRandom.ThisThreadsRandom.Next(0, logons.Count() - 1)];
-                        KAWAII_Theme_Helper.ChangeLogonBackground(s);
-                        log.Add("___Logon applied: " + s);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\lockscreen.jpg", winVer);
+                        log.Add("___Lockscreen applied: " + themeDir + "\\lockscreen.jpg");
                     }
-                    else if (mode.Equals("sequence") || mode.Equals("s"))
+                    else if (File.Exists(themeDir + "\\logon.jpg"))
                     {
-                        if (!File.Exists(appFolder + "\\logon.used"))
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\logon.jpg", winVer);
+                        log.Add("___Lockscreen applied: " + themeDir + "\\logon.jpg");
+                    }
+                    else
+                    {
+                        SearchForLockscreenBackgrounds(ref lockscreens);
+
+                        foreach (var bg in lockscreens)
                         {
-                            File.WriteAllText(appFolder + "\\logon.used", "");
+                            if (Path.GetFileNameWithoutExtension(bg).EqualsIgnoreCase(Path.GetFileNameWithoutExtension(path)))
+                            {
+                                KAWAII_Theme_Helper.ChangeLockscreenBackground(bg, winVer);
+                                log.Add("___Lockscreen applied: " + bg);
+                                break;
+                            }
                         }
-                        var loaded = ReadAllLines(appFolder + "\\logon.used").ToList();
-                        if (!File.Exists(appFolder + @"\logon.seq") || ReadAllLines(appFolder + @"\logon.seq").Count() <= 0)
+
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                SearchForLockscreenBackgrounds(ref lockscreens);
+
+                if (lockscreens.Count > 0)
+                {
+                    if (mode.EqualsIgnoreCase("random"))
+                    {
+                        if (commandPrompt == false && File.Exists(appFolder + "\\lockscreen.used"))
                         {
-                            logons = logons.OrderBy(a => a).ToList();
-                            File.WriteAllLines(appFolder + @"\logon.seq", logons);
+                            File.Delete(appFolder + "\\lockscreen.used");
+                        }
+                        var s = lockscreens[ThreadSafeRandom.ThisThreadsRandom.Next(0, lockscreens.Count() - 1)];
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(s, winVer);
+                        log.Add("___Lockscreen applied: " + s);
+                    }
+                    else if (mode.EqualsIgnoreCase("sequence"))
+                    {
+                        if (!File.Exists(appFolder + "\\lockscreen.used"))
+                        {
+                            File.WriteAllText(appFolder + "\\lockscreen.used", "");
+                        }
+                        var loaded = ReadAllLines(appFolder + "\\lockscreen.used").ToList();
+                        if (!File.Exists(appFolder + @"\lockscreen.seq") || ReadAllLines(appFolder + @"\lockscreen.seq").Count() <= 0)
+                        {
+                            lockscreens = lockscreens.OrderBy(a => a).ToList();
+                            File.WriteAllLines(appFolder + @"\lockscreen.seq", lockscreens);
                         }
                         else
                         {
-                            var queue = ReadAllLines(appFolder + "\\logon.seq").ToList();
+                            var queue = ReadAllLines(appFolder + "\\lockscreen.seq").ToList();
                             var union = loaded.Concat(queue);
-                            var newLogons = logons.Except(union);
-                            if (newLogons.Count() > 0)
+                            var newLockscreens = lockscreens.Except(union);
+                            if (newLockscreens.Count() > 0)
                             {
-                                queue.AddRange(newLogons);
+                                queue.AddRange(newLockscreens);
                                 queue.OrderBy(a => a).ToList();
-                                File.WriteAllLines(appFolder + @"\logon.seq", queue);
+                                File.WriteAllLines(appFolder + @"\lockscreen.seq", queue);
                             }
                         }
-                        var seq = ReadAllLines(appFolder + @"\logon.seq");
+                        var seq = ReadAllLines(appFolder + @"\lockscreen.seq");
                         if (_exclude != null && _exclude.Count() > 0)
                         {
                             seq = seq.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\")));
@@ -416,36 +514,36 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(seq);
                         var lg = rse.Dequeue();
                         loaded.Add(lg);
-                        File.WriteAllLines(appFolder + @"\logon.used", loaded);
-                        File.WriteAllLines(appFolder + @"\logon.seq", rse);
-                        KAWAII_Theme_Helper.ChangeLogonBackground(lg);
-                        log.Add("___Logon applied: " + lg);
+                        File.WriteAllLines(appFolder + @"\lockscreen.used", loaded);
+                        File.WriteAllLines(appFolder + @"\lockscreen.seq", rse);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer);
+                        log.Add("___Lockscreen applied: " + lg);
                     }
-                    else if (mode.Equals("random sequence") || mode.Equals("rs"))
+                    else if (mode.EqualsIgnoreCase("random sequence"))
                     {
-                        if (!File.Exists(appFolder + "\\logon.used"))
+                        if (!File.Exists(appFolder + "\\lockscreen.used"))
                         {
-                            File.WriteAllText(appFolder + "\\logon.used", "");
+                            File.WriteAllText(appFolder + "\\lockscreen.used", "");
                         }
-                        var loaded = ReadAllLines(appFolder + "\\logon.used").ToList(); ;
-                        if (!File.Exists(appFolder + @"\logon.rseq") || ReadAllLines(appFolder + @"\logon.rseq").Count() <= 0)
+                        var loaded = ReadAllLines(appFolder + "\\lockscreen.used").ToList(); ;
+                        if (!File.Exists(appFolder + @"\lockscreen.rseq") || ReadAllLines(appFolder + @"\lockscreen.rseq").Count() <= 0)
                         {
-                            logons.Shuffle();
-                            File.WriteAllLines(appFolder + @"\logon.rseq", logons);
+                            lockscreens.Shuffle();
+                            File.WriteAllLines(appFolder + @"\lockscreen.rseq", lockscreens);
                         }
                         else
                         {
-                            var queue = ReadAllLines(appFolder + "\\logon.rseq").ToList();
+                            var queue = ReadAllLines(appFolder + "\\lockscreen.rseq").ToList();
                             var union = loaded.Concat(queue);
-                            var newLogons = logons.Except(union);
-                            if (newLogons.Count() > 0)
+                            var newLockscreens = lockscreens.Except(union);
+                            if (newLockscreens.Count() > 0)
                             {
-                                queue.AddRange(newLogons);
+                                queue.AddRange(newLockscreens);
                                 queue.Shuffle();
-                                File.WriteAllLines(appFolder + @"\logon.rseq", queue);
+                                File.WriteAllLines(appFolder + @"\lockscreen.rseq", queue);
                             }
                         }
-                        var seq = ReadAllLines(appFolder + @"\logon.rseq");
+                        var seq = ReadAllLines(appFolder + @"\lockscreen.rseq");
                         if (_exclude != null && _exclude.Count() > 0)
                         {
                             seq = seq.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\")));
@@ -453,26 +551,10 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(seq);
                         var lg = rse.Dequeue();
                         loaded.Add(lg);
-                        File.WriteAllLines(appFolder + @"\logon.used", loaded);
-                        File.WriteAllLines(appFolder + @"\logon.rseq", rse);
-                        KAWAII_Theme_Helper.ChangeLogonBackground(lg);
-                        log.Add("___Logon applied: " + lg);
-                    }
-                    else // Respective mode
-                    {
-                        if (commandPrompt == false && File.Exists(appFolder + "\\logon.used"))
-                        {
-                            File.Delete(appFolder + "\\logon.used");
-                        }
-                        if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path)))
-                        {
-                            var files = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon\" + Path.GetFileNameWithoutExtension(path), "*.jpg", SearchOption.AllDirectories);
-                            if (files.Count() > 0)
-                            {
-                                KAWAII_Theme_Helper.ChangeLogonBackground(files[0]);
-                                log.Add("___Logon applied: " + files[0]);
-                            }
-                        }
+                        File.WriteAllLines(appFolder + @"\lockscreen.used", loaded);
+                        File.WriteAllLines(appFolder + @"\lockscreen.rseq", rse);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer);
+                        log.Add("___Lockscreen applied: " + lg);
                     }
                 }
             }
@@ -489,7 +571,7 @@ namespace KAWAII_Theme_Switcher
         }
     }
 
-    static class MyExtensions
+    static class HelperFunction
     {
         public static IEnumerable<string> ReadAllLines(string filename)
         {
@@ -518,6 +600,37 @@ namespace KAWAII_Theme_Switcher
                 list[k] = list[n];
                 list[n] = value;
             }
+        }
+        public static WindowsVersion GetWindowsVersion()
+        {
+            WindowsVersion ver = WindowsVersion.UNSUPPORTED;
+            string r = "";
+            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem"))
+            {
+                ManagementObjectCollection information = searcher.Get();
+                if (information != null)
+                {
+                    foreach (ManagementObject obj in information)
+                    {
+                        r = obj["Caption"].ToString() + " - " + obj["OSArchitecture"].ToString();
+                    }
+                }
+
+                if (r.Contains("Windows 10"))
+                {
+                    ver =  WindowsVersion.WIN10;
+                }
+                else if (r.Contains("Windows 8"))
+                {
+                    ver = WindowsVersion.WIN8;
+                }
+                else if (r.Contains("Windows 7"))
+                {
+                    ver = WindowsVersion.WIN7;
+                }
+            }
+
+            return ver;
         }
     }
 

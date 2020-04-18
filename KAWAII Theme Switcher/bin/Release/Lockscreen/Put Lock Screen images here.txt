@@ -1,0 +1,4 @@
+When using Respective mode, make sure the jpg file has the same name as the theme. Example:
+
+Kagamine Rin.theme
+Kagamine Rin.jpg
