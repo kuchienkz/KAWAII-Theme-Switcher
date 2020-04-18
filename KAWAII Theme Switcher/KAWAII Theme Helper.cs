@@ -216,6 +216,12 @@ namespace KAWAII_Theme_Switcher
 
             if (version == WindowsVersion.WIN10 || version == WindowsVersion.WIN8)
             {
+                var regChk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization");
+                if (regChk.GetValue("NoChangingLockScreen") == null || (int)regChk.GetValue("NoChangingLockScreen") == 0)
+                {
+                    Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization").SetValue("NoChangingLockScreen", 1);
+                }
+
                 var command = $@"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData\S-1-5-18\ReadOnly`"" /reset /T"" -NoNewWindow -Wait
