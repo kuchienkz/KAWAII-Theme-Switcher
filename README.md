@@ -7,12 +7,13 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 ## Main Features
 * Small, kawaii file size.
 * No services, background process etc.
-* Play theme's "theme change" sound (if any) until the very ends, before exiting.
-* Ability to change Lock Screen background.
-* Command Prompt support with arguments.
+* UI-less, just launch and done. Startup configurable.
+* Play theme's "theme change" sound (if any) until the very ends, no more trimmed sounds.
+* Ability to change Lock Screen background! Automatically! Configurable.
+* Command Prompt support with arguments. Unlimited possibilities.
 
 ## Requirements
- - Windows 7 or later as Operating System
+ - Windows 7 or newer as Operating System
  - [.NET 4.6 or Above](https://www.microsoft.com/en-us/download/details.aspx?id=48130)
  - 3rd-party theme support (optional)
  - StartIsBack (for Windows 10 user, optional)
@@ -64,7 +65,7 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - Open it, and put some theme's name there, without extension, just the name, one name per line.
 - All themes inside this file will be excluded from selection (all modes).
 
-### Logon Background Switching
+### Lockscreen Background Switching
 3rd-party themes usually comes with it's own Lockscreen background. KAWAII Theme Switcher support changing Lockscreen background with `any .jpg file with maximum size of 256KB` for Windows 7. There is no file size limit for later version Windows.
 
 #### How To
