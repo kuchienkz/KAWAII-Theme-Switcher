@@ -366,6 +366,14 @@ namespace KAWAII_Theme_Switcher
                     }
                     ChangeLockscreen(prms[0].RegexReplace(@"[a-z_ ]+[:=]{1} ?", "", -1).ToLower(), _exclude, path);
                 }
+                else
+                {
+                    var regChk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization");
+                    if (regChk.GetValue("NoChangingLockScreen") != null)
+                    {
+                        Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization").DeleteValue("NoChangingLockScreen");
+                    }
+                }
 
                 // Apply Theme/Visual Style
                 KAWAII_Theme_Helper.ApplyTheme(path, exitDelay);
