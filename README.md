@@ -1,5 +1,5 @@
 # KAWAII Theme Switcher
-A small tool for Windows 7 Theme enthusiast.
+A small tool for Windows Theme enthusiast. Now support Windows 10 !!!
 
 Use this app to switch between Windows themes with just One click! Plus, without showing any dialog! Yup. 
 KTS (in shorts), will scan your /Resources/Themes folder for .theme files and save each file's path for later.
@@ -8,13 +8,14 @@ KTS (in shorts), will scan your /Resources/Themes folder for .theme files and sa
 * Small, kawaii file size.
 * No services, background process etc.
 * Play theme's "theme change" sound (if any) until the very ends, before exiting.
-* Ability to change User Logon background (tested on Windows 7).
+* Ability to change Lock Screen background.
 * Command Prompt support with arguments.
 
-## System Requirements
- - Windows 7 Ultimate as operating System
+## Requirements
+ - Windows 7 or later as Operating System
  - [.NET 4.6 or Above](https://www.microsoft.com/en-us/download/details.aspx?id=48130)
- - 3rd-party theme support (optional, but recommended)
+ - 3rd-party theme support (optional)
+ - StartIsBack (for Windows 10 user, optional)
  
 ## Installation
 NO NEED for installation! Since this guy doesn't have any GUI, just put the EXE somewhere nice, Thats all!
@@ -64,18 +65,18 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - All themes inside this file will be excluded from selection (all modes).
 
 ### Logon Background Switching
-3rd-party themes usually comes with it's own Logon background. KAWAII Theme Switcher support changing Logon background with `any .jpg file with maximum size of 256KB`.
+3rd-party themes usually comes with it's own Lockscreen background. KAWAII Theme Switcher support changing Lockscreen background with `any .jpg file with maximum size of 256KB` for Windows 7. There is no file size limit for later version Windows.
 
 #### How To
-- Inside the folder where you put the EXE, create a text file named "logon.txt".
+- Inside the folder where you put the EXE, create a text file named "lockscreen.txt".
 - Open it, write "mode: [mode; see below.]"
 - Save and Close.
 
 #### Logon Selection Mode (Without Quotes!)
-- `respective` - Default mode. Pick Logon background based on current theme if it have it's own Logon background. If not, do nothing.
-- `sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
-- `random` - Pick a random .jpg file inside %windir%/Resources/Logon and it's subdirectories.
-- `random sequence` - Get all .jpg files inside %windir%/Resources/Logon and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
+- `respective` - Default mode. Pick Lockscreen background based on current theme, if it does have it's own Lockscreen background. If not, do nothing.
+- `sequence` - Get all .jpg files inside Lockscreen directory and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
+- `random` - Pick a random .jpg file inside Lockscreen directory and it's subdirectories.
+- `random sequence` - Get all .jpg files inside Lockscreen directory and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
 
 ### Launch from Command Prompt
 - Yes, you can launch KAWAII Theme Switcher via Command Prompt!
@@ -104,7 +105,7 @@ First arguments are for Theme Selection mode. Case-insensitive.
 ```
 
 #### Second Arguments
-Optional. Second arguments are for Logon Selection mode.
+Optional. Second arguments are for Lockscreen Selection mode.
 - Path to .jpg file (with quotes if there are spaces):
 ```xaml
 > KAWAII Theme Switcher.exe [first argument] C:\Users\Kuchienkz\Pictures\kagamineRin.jpg
@@ -121,3 +122,4 @@ Optional. Second arguments are for Logon Selection mode.
 
 ## Additional Information
 - Tested on Windows 7 Ultimate 64bit with 3rd-party theme support.
+- Also Tested on Windows 10 version 1909 64bit with 3rd-party theme support and StartIsBack installed.
