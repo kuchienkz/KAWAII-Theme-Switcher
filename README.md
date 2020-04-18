@@ -72,11 +72,20 @@ In case you have "THOSE" themes that you dont want to show to someone else, you 
 - Open it, write "mode: [mode; see below.]"
 - Save and Close.
 
-#### Logon Selection Mode (Without Quotes!)
+#### Lockscreen Selection Mode (Without Quotes!)
 - `respective` - Default mode. Pick Lockscreen background based on current theme, if it does have it's own Lockscreen background. If not, do nothing.
 - `sequence` - Get all .jpg files inside Lockscreen directory and it's subdirectories, sort the sequence (ascending), pick one from the sequence on every switch.
 - `random` - Pick a random .jpg file inside Lockscreen directory and it's subdirectories.
 - `random sequence` - Get all .jpg files inside Lockscreen directory and it's subdirectories, shuffle the sequence, pick one from the sequence on every switch.
+
+For `any mode beside respective mode`, KTS search for .jpg files on ALL of the following locations, including their subdirectories:
+- ~folder_containing_the_exe\Lockscreen
+- C:\Windows\Resources\Logon
+- C:\Windows\Resources\Lockscreen
+
+ALL .jpg files in these folder will be treated as Lockscreen background, regardless of their names. If neither of those folders exists, a folder named `Lockscreen` will be created on the same location as the KTS executable file, which then you can fill with some .jpg files later. You may create another of those folders manually.
+
+For `respective mode`, KTS will search `a .jpg file inside every theme's folder named lockscreen.jpg or logon.jpg`. This doesn't include their subdirectories. However, if none .jpg found, KTS will search for .jpg file inside ALL the mentioned locations above, which has the same name as the related theme.
 
 ### Launch from Command Prompt
 - Yes, you can launch KAWAII Theme Switcher via Command Prompt!
