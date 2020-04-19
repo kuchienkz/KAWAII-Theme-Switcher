@@ -57,13 +57,21 @@ repeat
 The number '3' above can be any number. The first '3' is the 'remaining value', the second one is the 'number of repeat'. On 'skip.txt' creation, you should set 'remaining value' with the same value with the 'number of repeat' value.
 'Repeating skip' is useful if you want to switch theme every X startup, instead of every startup.
 
-### Exclusion
-In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Exclusion.
+### Blacklisting
+In case you have "THOSE" themes that you dont want to show to someone else, you can add them to Blacklist.
 
 #### How To
-- Inside the folder where you put the EXE, create a text file named "exclusion.txt".
+- Inside the folder where you put the EXE, create a text file named "blacklist.txt".
 - Open it, and put some theme's name there, without extension, just the name, one name per line.
 - All themes inside this file will be excluded from selection (all modes).
+
+### Whitelisting
+The opposite of Blacklist, KTS will apply theme only if it exists in Whitelist. If both Blacklist and Whitelist exists, `Blacklist will be ignored`.
+
+#### How To
+- Inside the folder where you put the EXE, create a text file named "whitelist.txt".
+- Open it, and put some theme's name there, without extension, just the name, one name per line.
+- Only themes inside this file will be included to selection (all modes).
 
 ### Lockscreen Background Switching
 3rd-party themes usually comes with it's own Lockscreen background. KAWAII Theme Switcher support changing Lockscreen background with `any .jpg file with maximum size of 256KB` for Windows 7. There is no file size limit for later version Windows.
@@ -87,6 +95,10 @@ For `any mode beside respective mode`, KTS search for .jpg files on ALL of the f
 ALL .jpg files in these folder will be treated as Lockscreen background, regardless of their names. If neither of those folders exists, a folder named `Lockscreen` will be created on the same location as the KTS executable file, which then you can fill with some .jpg files later. You may create another of those folders manually.
 
 For `respective mode`, KTS will search `a .jpg file inside every theme's folder named lockscreen.jpg or logon.jpg`. This doesn't include their subdirectories. However, if none .jpg found, KTS will search for .jpg file inside ALL the mentioned locations above, which has the same name as the related theme.
+
+### Tips & Trick
+#### Disabling Theme Switching Function
+In case you don't want to use theme switching function, but still want to switch Lockscreen bacground, you can create an empty whitelist.txt file. Please note that since theme switching is skipped, `respective` mode can't be used for Lockscreen background switching.
 
 ### Launch from Command Prompt
 - Yes, you can launch KAWAII Theme Switcher via Command Prompt!
