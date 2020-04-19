@@ -76,6 +76,9 @@ The opposite of Blacklist, KTS will apply theme only if it exists in Whitelist. 
 ### Lockscreen Background Switching
 3rd-party themes usually comes with it's own Lockscreen background. KAWAII Theme Switcher support changing Lockscreen background with `any .jpg file with maximum size of 256KB` for Windows 7. There is no file size limit for later version Windows.
 
+#### Image Format
+KTS support 3 image format: `JPG, PNG, and BMP`. For saving spaces, better performance, and maximum compability, KTS only use `.jpg` file for Lockscreen. `By default, KTS will create a .jpg version for all non-jpg image file found`, automatically.
+
 #### How To
 - Inside the folder where you put the EXE, create a text file named "lockscreen.txt".
 - Open it, write "mode: [mode; see below.]"
@@ -94,7 +97,7 @@ For `any mode beside respective mode`, KTS search for .jpg files on ALL of the f
 
 ALL .jpg files in these folder will be treated as Lockscreen background, regardless of their names. If neither of those folders exists, a folder named `Lockscreen` will be created on the same location as the KTS executable file, which then you can fill with some .jpg files later. You may create another of those folders manually.
 
-For `respective mode`, KTS will search `a .jpg file inside every theme's folder named lockscreen.jpg or logon.jpg`. This doesn't include their subdirectories. However, if none .jpg found, KTS will search for .jpg file inside ALL the mentioned locations above, which has the same name as the related theme.
+For `respective` mode, KTS will search `a .jpg file inside every theme's folder named lockscreen.jpg or logon.jpg`. This doesn't include their subdirectories. However, if none .jpg found, KTS will search for .jpg file inside ALL the mentioned locations above, which has the same name as the related theme.
 
 ### Tips & Trick
 #### Disabling Theme Switching Function
