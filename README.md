@@ -31,9 +31,9 @@ Well, in order to enable some features, you need to do some stuff, but don't wor
 - Lastly, launch the EXE, it will automatically create a registry for startup purpose.
 * What about the "start"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
 So, '10000' means '10 seconds' delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
-Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remeber that negative values are count as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
+Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remember that negative values are treated as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
 * You can also set the "Exit Delay" by writing "exit: [delay]" on the second line. This will hold application before actually closing.
-This is useful if you heard the "theme change" sound trimmed. Exit delay doesn't support negative values.
+This is useful if you heard the "theme change" sound trimmed. Exit delays are in milliseconds and DOES NOT support negative values.
 
 ### Theme Selection Mode
 Normally, KTS use RANDOM mode for theme selection. That means, on each launch, it will pick a theme RANDOMLY from your themes folder.
