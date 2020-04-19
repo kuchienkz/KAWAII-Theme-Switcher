@@ -222,15 +222,22 @@ namespace KAWAII_Theme_Switcher
                     Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization").SetValue("NoChangingLockScreen", 1);
                 }
 
-                var command = $@"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
+                var command = @"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:programdata\Microsoft\Windows\SystemData\S-1-5-18\ReadOnly`"" /reset /T"" -NoNewWindow -Wait
 Remove-Item -Path ""$env:programdata\Microsoft\Windows\SystemData\S-1-5-18\ReadOnly\LockScreen_Z\*"" -Force
 Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList ""/F `""$env:systemroot\Web\Screen`"" /R /A /D Y"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:systemroot\Web\Screen`"" /grant Administrators:(OI)(CI)F /T"" -NoNewWindow -Wait
 Start-Process -filePath ""$env:systemroot\system32\icacls.exe"" -ArgumentList ""`""$env:systemroot\Web\Screen`"" /reset /T"" -NoNewWindow -Wait
-Copy-Item -Path ""$env:systemroot\Web\Screen\img100.jpg"" -Destination ""$env:systemroot\Web\Screen\img200.jpg"" -Force
-Copy-Item -Path ""{jpegFilename}"" -Destination ""$env:systemroot\Web\Screen\img100.jpg"" -Force";
+if(!(Test-Path ""$env:systemroot\Web\Screen\img100.jpg.bak""))
+{
+    Copy-Item -Path ""$env:systemroot\Web\Screen\img100.jpg"" -Destination ""$env:systemroot\Web\Screen\img100.jpg.bak"" -Force
+}
+if(Test-Path ""$env:systemroot\Web\Screen\img100.jpg"")
+{
+    Remove-Item -Path ""$env:systemroot\Web\Screen\img100.jpg"" -Force
+}
+Copy-Item -Path """ + jpegFilename + @""" -Destination ""$env:systemroot\Web\Screen\img100.jpg"" -Force";
 
                 var psCommandBytes = System.Text.Encoding.Unicode.GetBytes(command);
                 var psCommandBase64 = Convert.ToBase64String(psCommandBytes);

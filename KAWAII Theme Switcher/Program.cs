@@ -21,6 +21,8 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -42,10 +44,11 @@ namespace KAWAII_Theme_Switcher
 
     public static class Program
     {
-        private static string[] _exclude;
+        private static string[] _blacklist;
         private static string appFolder = AppDomain.CurrentDomain.BaseDirectory;
         public static List<string> log = new List<string>();
         private static WindowsVersion winVer = GetWindowsVersion();
+        private static string[] _whitelist;
 
         [STAThread(), PermissionSet(SecurityAction.LinkDemand)]
         static void Main(string[] args)
@@ -100,11 +103,11 @@ namespace KAWAII_Theme_Switcher
                     }
                     else if (args[1].EqualsIgnoreCase("random"))
                     {
-                        ChangeLockscreen("random", _exclude, "", true);
+                        ChangeLockscreen("random", _blacklist, "", true);
                     }
                     else if (!path.Equals("") && !args[1].Equals(""))
                     {
-                        ChangeLockscreen("respective", _exclude, path, true);
+                        ChangeLockscreen("respective", _blacklist, path, true);
                     }
                 }
 
@@ -147,7 +150,7 @@ namespace KAWAII_Theme_Switcher
                         rk.SetValue(valName, Application.ExecutablePath);
                     }
 
-                    if (startupDelay <= -1)
+                    if (startupDelay < 0)
                     {
                         log.Add("___Using Smart Delay...");
                         using (System.Diagnostics.PerformanceCounter cpu = new System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total"))
@@ -251,120 +254,148 @@ namespace KAWAII_Theme_Switcher
                     // TODO
                 }
 
-                //Load Exclusion
-                if (File.Exists(appFolder + "\\exclusion.txt"))
+                //Load Whitelist if any, else load Blacklist if any
+                if (File.Exists(appFolder + "\\whitelist.txt"))
                 {
-                    log.Add("__exclusion.txt found! Loading exclusion...");
-                    _exclude = ReadAllLines(appFolder + "\\exclusion.txt").ToArray();
-                    log.Add("__Exclusion count: " + _exclude.Count());
+                    log.Add("whitelist.txt found! Loading whitelist...");
+                    _whitelist = ReadAllLines(appFolder + "\\whitelist.txt").ToArray();
+                    log.Add("__Whitelist count: " + _whitelist.Count());
+                }
+                else if (File.Exists(appFolder + "\\blacklist.txt"))
+                {
+                    log.Add("blacklist.txt found! Loading blacklist...");
+                    _blacklist = ReadAllLines(appFolder + "\\blacklist.txt").ToArray();
+                    log.Add("__Blacklist count: " + _blacklist.Count());
                 }
 
-                //Get latest list for checking new Themes
-                List<string> latestThemeList = new List<string>();
-                foreach (var d in Directory.GetDirectories(KAWAII_Theme_Helper.windir + @"\Resources"))
+                if (_whitelist != null && _whitelist.Length == 0)
                 {
-                    latestThemeList.AddRange(Directory.GetFiles(d, "*.theme", SearchOption.AllDirectories));
-                }
-                if (_exclude != null && _exclude.Count() > 0)
-                {
-                    latestThemeList = latestThemeList.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a))).ToList();
-                }
-
-                // Theme selection
-                if (File.Exists(appFolder + @"\RSequence.txt"))
-                {
-                    if (!File.Exists(appFolder + @"\loaded.txt"))
-                    {
-                        File.WriteAllText(appFolder + @"\loaded.txt", "");
-                    }
-                    var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
-                    if (ReadAllLines(appFolder + "\\RSequence.txt").Count() <= 0)
-                    {
-                        var rs = latestThemeList.ToList();
-                        rs.Shuffle();
-                        File.WriteAllLines(appFolder + @"\RSequence.txt", rs);
-                    }
-                    else
-                    {
-                        var queue = ReadAllLines(appFolder + "\\RSequence.txt").ToList();
-                        var union = loaded.Concat(queue);
-                        var newThemes = latestThemeList.Except(union);
-                        if (newThemes.Count() > 0)
-                        {
-                            queue.AddRange(newThemes);
-                            queue.Shuffle();
-                            File.WriteAllLines(appFolder + @"\RSequence.txt", queue);
-                        }
-                    }
-                    var lrse = ReadAllLines(appFolder + "\\RSequence.txt");
-                    if (_exclude != null && _exclude.Count() > 0)
-                    {
-                        lrse = lrse.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a)));
-                    }
-                    var rse = new Queue<string>(lrse);
-                    path = rse.Dequeue();
-                    loaded.Add(path);
-                    File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
-                    File.WriteAllLines(appFolder + @"\RSequence.txt", rse);
-                }
-                else if (File.Exists(appFolder + @"\Sequence.txt"))
-                {
-                    if (!File.Exists(appFolder + @"\loaded.txt"))
-                    {
-                        File.WriteAllText(appFolder + @"\loaded.txt", "");
-                    }
-                    var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
-                    if (ReadAllLines(appFolder + "\\Sequence.txt").Count() <= 0)
-                    {
-                        var rs = new DirectoryInfo(KAWAII_Theme_Helper.windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
-                        rs = rs.OrderBy(a => a).ToList();
-                        File.WriteAllLines(appFolder + @"\Sequence.txt", rs);
-                    }
-                    else
-                    {
-                        var queue = ReadAllLines(appFolder + "\\Sequence.txt").ToList();
-                        var union = loaded.Concat(queue);
-                        var newThemes = latestThemeList.Except(union);
-                        if (newThemes.Count() > 0)
-                        {
-                            queue.AddRange(newThemes);
-                            queue = queue.OrderBy(a => a).ToList();
-                            File.WriteAllLines(appFolder + @"\Sequence.txt", queue);
-                        }
-                    }
-                    var lrse = ReadAllLines(appFolder + "\\Sequence.txt");
-                    if (_exclude != null && _exclude.Count() > 0)
-                    {
-                        lrse = lrse.Where(a => !_exclude.Contains(Path.GetFileNameWithoutExtension(a)));
-                    }
-                    var rse = new Queue<string>(lrse);
-                    path = rse.Dequeue();
-                    loaded.Add(path);
-                    File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
-                    File.WriteAllLines(appFolder + @"\Sequence.txt", rse);
+                    log.Add("__Empty whitelist! Theme switch skipped!");
                 }
                 else
                 {
-                    if (File.Exists(appFolder + @"\loaded.txt"))
+                    //Get latest list for checking new Themes
+                    List<string> latestThemeList = new List<string>();
+                    foreach (var d in Directory.GetDirectories(KAWAII_Theme_Helper.windir + @"\Resources"))
                     {
-                        File.Delete(appFolder + @"\loaded.txt");
+                        latestThemeList.AddRange(Directory.GetFiles(d, "*.theme", SearchOption.AllDirectories));
                     }
-                    path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
-                    while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
+
+                    if (_whitelist != null && _whitelist.Length > 0)
                     {
+                        latestThemeList = latestThemeList.Where(a => _whitelist.Contains(Path.GetFileNameWithoutExtension(a))).ToList();
+                    }
+                    else if (_blacklist != null && _blacklist.Length > 0)
+                    {
+                        latestThemeList = latestThemeList.Where(a => !_blacklist.Contains(Path.GetFileNameWithoutExtension(a))).ToList();
+                    }
+
+                    // Theme selection
+                    if (File.Exists(appFolder + @"\RSequence.txt"))
+                    {
+                        if (!File.Exists(appFolder + @"\loaded.txt"))
+                        {
+                            File.WriteAllText(appFolder + @"\loaded.txt", "");
+                        }
+                        var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
+                        if (ReadAllLines(appFolder + "\\RSequence.txt").Count() <= 0)
+                        {
+                            var rs = latestThemeList.ToList();
+                            rs.Shuffle();
+                            File.WriteAllLines(appFolder + @"\RSequence.txt", rs);
+                        }
+                        else
+                        {
+                            var queue = ReadAllLines(appFolder + "\\RSequence.txt").ToList();
+                            var union = loaded.Concat(queue);
+                            var newThemes = latestThemeList.Except(union);
+                            if (newThemes.Count() > 0)
+                            {
+                                queue.AddRange(newThemes);
+                                queue.Shuffle();
+                                File.WriteAllLines(appFolder + @"\RSequence.txt", queue);
+                            }
+                        }
+                        var lrse = ReadAllLines(appFolder + "\\RSequence.txt");
+
+                        if (_whitelist != null && _whitelist.Length > 0)
+                        {
+                            lrse = lrse.Where(a => _whitelist.Contains(Path.GetFileNameWithoutExtension(a)));
+                        }
+                        else if (_blacklist != null && _blacklist.Length > 0)
+                        {
+                            lrse = lrse.Where(a => !_blacklist.Contains(Path.GetFileNameWithoutExtension(a)));
+                        }
+                        var rse = new Queue<string>(lrse);
+                        path = rse.Dequeue();
+                        loaded.Add(path);
+                        File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                        File.WriteAllLines(appFolder + @"\RSequence.txt", rse);
+                    }
+                    else if (File.Exists(appFolder + @"\Sequence.txt"))
+                    {
+                        if (!File.Exists(appFolder + @"\loaded.txt"))
+                        {
+                            File.WriteAllText(appFolder + @"\loaded.txt", "");
+                        }
+                        var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
+                        if (ReadAllLines(appFolder + "\\Sequence.txt").Count() <= 0)
+                        {
+                            var rs = new DirectoryInfo(KAWAII_Theme_Helper.windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
+                            rs = rs.OrderBy(a => a).ToList();
+                            File.WriteAllLines(appFolder + @"\Sequence.txt", rs);
+                        }
+                        else
+                        {
+                            var queue = ReadAllLines(appFolder + "\\Sequence.txt").ToList();
+                            var union = loaded.Concat(queue);
+                            var newThemes = latestThemeList.Except(union);
+                            if (newThemes.Count() > 0)
+                            {
+                                queue.AddRange(newThemes);
+                                queue = queue.OrderBy(a => a).ToList();
+                                File.WriteAllLines(appFolder + @"\Sequence.txt", queue);
+                            }
+                        }
+                        var lrse = ReadAllLines(appFolder + "\\Sequence.txt");
+                        if (_whitelist != null && _whitelist.Length > 0)
+                        {
+                            lrse = lrse.Where(a => _whitelist.Contains(Path.GetFileNameWithoutExtension(a)));
+                        }
+                        else if (_blacklist != null && _blacklist.Length > 0)
+                        {
+                            lrse = lrse.Where(a => !_blacklist.Contains(Path.GetFileNameWithoutExtension(a)));
+                        }
+                        var rse = new Queue<string>(lrse);
+                        path = rse.Dequeue();
+                        loaded.Add(path);
+                        File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                        File.WriteAllLines(appFolder + @"\Sequence.txt", rse);
+                    }
+                    else
+                    {
+                        if (File.Exists(appFolder + @"\loaded.txt"))
+                        {
+                            File.Delete(appFolder + @"\loaded.txt");
+                        }
                         path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
+                        while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
+                        {
+                            path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
+                        }
                     }
                 }
 
                 // Lockscreen Modifier
                 if (File.Exists(appFolder + @"\lockscreen.txt"))
                 {
+                    log.Add("lockscreen.txt found! Loading Lockscreen backgrounds...");
                     var prms = File.ReadAllLines(appFolder + "\\lockscreen.txt").ToList();
                     if (prms.Count == 0)
                     {
                         prms.Add("respective");
                     }
-                    ChangeLockscreen(prms[0].RegexReplace(@"[a-z_ ]+[:=]{1} ?", "", -1).ToLower(), _exclude, path);
+                    ChangeLockscreen(prms[0].RegexReplace(@"[a-z_ ]+[:=]{1} ?", "", -1).ToLower(), _blacklist, path);
                 }
                 else
                 {
@@ -375,9 +406,12 @@ namespace KAWAII_Theme_Switcher
                     }
                 }
 
-                // Apply Theme/Visual Style
-                KAWAII_Theme_Helper.ApplyTheme(path, exitDelay);
-                log.Add("___Theme applied: " + path);
+                if (path.Length > 0)
+                {
+                    // Apply Theme/Visual Style
+                    KAWAII_Theme_Helper.ApplyTheme(path, exitDelay);
+                    log.Add("___Theme applied: " + path);
+                }
 
                 log.Add("_END");
                 log.Add("");
@@ -389,24 +423,25 @@ namespace KAWAII_Theme_Switcher
         {
             if (Directory.Exists(appFolder + @"\Lockscreen"))
             {
-                var jpgs = Directory.GetFiles(appFolder + @"\Lockscreen", "*.jpg", SearchOption.AllDirectories);
-                if (jpgs.Length > 0)
+                var jpgs = GetFilesByExtensions(appFolder + @"\Lockscreen",  SearchOption.AllDirectories, ".jpg", ".png", ".bmp");
+
+                if (jpgs.Count() > 0)
                 {
                     list.AddRange(jpgs);
                 }
             }
             if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Lockscreen"))
             {
-                var jpgs = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Lockscreen", "*.jpg", SearchOption.AllDirectories);
-                if (jpgs.Length > 0)
+                var jpgs = GetFilesByExtensions(KAWAII_Theme_Helper.windir + @"\Resources\Lockscreen", SearchOption.AllDirectories, ".jpg", ".png", ".bmp");
+                if (jpgs.Count() > 0)
                 {
                     list.AddRange(jpgs);
                 }
             }
             if (Directory.Exists(KAWAII_Theme_Helper.windir + @"\Resources\Logon"))
             {
-                var jpgs = Directory.GetFiles(KAWAII_Theme_Helper.windir + @"\Resources\Logon", "*.jpg", SearchOption.AllDirectories);
-                if (jpgs.Length > 0)
+                var jpgs = GetFilesByExtensions(KAWAII_Theme_Helper.windir + @"\Resources\Logon", SearchOption.AllDirectories, ".jpg", ".png", ".bmp");
+                if (jpgs.Count() > 0)
                 {
                     list.AddRange(jpgs);
                 }
@@ -416,14 +451,23 @@ namespace KAWAII_Theme_Switcher
             {
                 Directory.CreateDirectory(appFolder + @"\Lockscreen");
                 File.WriteAllText(appFolder + "\\Lockscreen\\Put Lock Screen images here.txt",
-                    "When using Respective mode, either put it inside the related theme folder and name it lockscreen.jpg, OR you can put it in this folder but make sure the jpg file has the same name as the theme. Example:" +
+                    "When using Respective mode, either put it inside the related theme folder and name it lockscreen.jpg, " +
+                    "OR you can put it in this folder but make sure the jpg file has the same name as the theme. Example:" +
                     "\n\nKagamine Rin.theme" +
                     "\nKagamine Rin.jpg");
             }
             else
             {
-                if (list.Count > 0 && _exclude != null)
-                    list = list.Where(a => !_exclude.Any(b => a.Contains("\\" + b + "\\"))).ToList();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (!Path.GetExtension(list[i]).EqualsIgnoreCase(".jpg"))
+                    {
+                        list[i] = ConvertToJPG(list[i]);
+                    }
+                }
+
+                if (list.Count > 0 && _blacklist != null)
+                    list = list.Where(a => !_blacklist.Any(b => a.Contains("\\" + b + "\\"))).ToList();
             }
         }
 
@@ -446,6 +490,24 @@ namespace KAWAII_Theme_Switcher
                 if (rawpath.Length > 0)
                 {
                     var themeDir = Path.GetDirectoryName(Environment.ExpandEnvironmentVariables(rawpath));
+                    if (File.Exists(themeDir + "\\lockscreen.png"))
+                    {
+                        ConvertToJPG(themeDir + "\\lockscreen.png");
+                    }
+                    else if (File.Exists(themeDir + "\\lockscreen.bmp"))
+                    {
+                        ConvertToJPG(themeDir + "\\lockscreen.bmp");
+                    }
+
+                    if (File.Exists(themeDir + "\\logon.png"))
+                    {
+                        ConvertToJPG(themeDir + "\\logon.png");
+                    }
+                    else if (File.Exists(themeDir + "\\logon.bmp"))
+                    {
+                        ConvertToJPG(themeDir + "\\logon.bmp");
+                    }
+
                     if (File.Exists(themeDir + "\\lockscreen.jpg"))
                     {
                         KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\lockscreen.jpg", winVer);
@@ -581,6 +643,26 @@ namespace KAWAII_Theme_Switcher
 
     static class HelperFunction
     {
+        public static IEnumerable<string> GetFilesByExtensions(string folderPath, SearchOption searchOption, params string[] extensions)
+        {
+            if (extensions == null)
+                throw new ArgumentNullException("extensions");
+            var dir = new DirectoryInfo(folderPath);
+            IEnumerable<FileInfo> files = dir.EnumerateFiles("*.*", searchOption);
+            return files.Where(f => extensions.Contains(f.Extension.ToLower())).Select(f => f.FullName);
+        }
+        public static string ConvertToJPG(string imagePath)
+        {
+            var jpgPath = Path.GetDirectoryName(imagePath) + "\\" + Path.GetFileNameWithoutExtension(imagePath) + ".jpg";
+            if (!File.Exists(jpgPath))
+            {
+                Image a = Image.FromFile(imagePath);
+                a.Save(jpgPath, ImageFormat.Jpeg);
+                a.Dispose();
+            }
+
+            return jpgPath;
+        }
         public static IEnumerable<string> ReadAllLines(string filename)
         {
             return File.ReadAllLines(filename).Where(a => !a.Replace(" ", "").Equals(""));
