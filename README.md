@@ -28,7 +28,7 @@ Well, in order to enable some features, you need to do some stuff, but don't wor
 - Inside the folder where you put the EXE, create a text file named "startup.txt". 
 - Open it, write "start: 10000", make sure you wrote it on the FIRST LINE.
 - Save and close.
-- Lastly, launch the EXE, it will automatically create a registry for startup purpose.
+- Lastly, launch the EXE, it will automatically create a scheduled task for startup purpose.
 * What about the "start"?? That's a delay before changing your theme when it launch on startup, in Milliseconds.
 So, '10000' means '10 seconds' delay before changing theme. Yes, you may modify this. You can set start delay with negative values.
 Negative values means it will wait until current CPU Usage is 20% or lower for X seconds. Remember that negative values are treated as SECONDS, putting -1000 means it will hold the proccess until current CPU Usage is 20% or lower for 1000 SECONDS!
