@@ -19,6 +19,7 @@ x86/
 bld/
 [Oo]bj/
 [Ll]og/
+[Ll]ockscreen/*
 
 # Visual Studio 2015 cache/options directory
 .vs/
