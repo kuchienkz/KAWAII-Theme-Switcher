@@ -21,6 +21,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -61,6 +62,7 @@ namespace KAWAII_Theme_Switcher
             var path = "";
             log.Add("[" + DateTime.Now.ToLongDateString() + "]");
             log.Add("Environtment directory: " + appFolder);
+
             if (args.Length > 0)
             {
                 log.Add("_Using Command Prompt mode...");
@@ -123,8 +125,6 @@ namespace KAWAII_Theme_Switcher
                 log.Add("_Using Standard mode...");
                 int exitDelay = 1500;
 
-                RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                var valName = AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
                 if (File.Exists(appFolder + "\\startup.txt"))
                 {
                     log.Add("__startup.txt found!");
@@ -144,11 +144,7 @@ namespace KAWAII_Theme_Switcher
                         exitDelay = 1500;
                     }
 
-                    if (rk.GetValue(valName) == null)
-                    {
-                        log.Add("___Startup registry NOT found! Creating new registry...");
-                        rk.SetValue(valName, Application.ExecutablePath);
-                    }
+                    CreateStartupTaskSchedule();
 
                     if (startupDelay < 0)
                     {
@@ -180,11 +176,7 @@ namespace KAWAII_Theme_Switcher
                 else
                 {
                     log.Add("__startup.txt NOT found!");
-                    if (rk.GetValue(valName) != null)
-                    {
-                        log.Add("___Startup registry found! Deleting registry...");
-                        rk.DeleteValue(valName, false);
-                    }
+                    RemoveScheduledStartupTask();
                 }
 
                 if (File.Exists(appFolder + "\\skip.txt"))
@@ -643,6 +635,77 @@ namespace KAWAII_Theme_Switcher
 
     static class HelperFunction
     {
+        public const string TASKPATH = @"KAWAII Apps\Kawaii Theme Switcher Launcher";
+
+        public static string ExecuteCommandLineCommands(string argument)
+        {
+            string output = "";
+            string error = "";
+            var p = new Process();
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = "/C " + argument;
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.Verb = "runas";
+            p.OutputDataReceived += (a, b) => output += b.Data;
+            p.ErrorDataReceived += (a, b) => error += b.Data;
+            p.Start();
+            p.BeginErrorReadLine();
+            p.BeginOutputReadLine();
+            p.WaitForExit();
+
+            if (output.Length > 0 && error.Length > 0)
+            {
+                return "STD_OUTPUT: " + output + Environment.NewLine + "STD_ERROR: " + error;
+            }
+            else if (output.Length > 0)
+            {
+                return output;
+            }
+
+            return error;
+        }
+
+        public static void CreateStartupTaskSchedule()
+        {
+            // Check for existing task
+            var output = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /QUERY /FO LIST /TN ""{TASKPATH}""");
+            
+            if (output.EqualsIgnoreCase("ERROR: The system cannot find the file specified."))
+            {
+                // task doesnt exists
+                // create task
+                Program.log.Add("___Startup Task NOT found! Scheduling a new task...");
+                var result = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /CREATE /SC ONLOGON /TN ""{TASKPATH}"" /TR ""{Application.ExecutablePath}"" /RL HIGHEST");
+                Console.WriteLine(result);
+                if (result.Contains("SUCCESS"))
+                {
+                    Program.log.Add("___Startup Task created successfully!");
+                }
+            }
+        }
+
+        public static void RemoveScheduledStartupTask()
+        {
+            // Check for existing task
+            var output = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /QUERY /FO LIST /TN ""{TASKPATH}""");
+
+            if (!output.Contains("ERROR"))
+            {
+                // delete task
+                Program.log.Add("___Startup Task found! Deleting task...");
+                var result = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /DELETE /TN ""{TASKPATH}"" /F");
+                Console.WriteLine(result);
+                if (result.Contains("SUCCESS"))
+                {
+                    Program.log.Add("___Startup Task deleted successfully!");
+                }
+            }
+        }
+
         public static IEnumerable<string> GetFilesByExtensions(string folderPath, SearchOption searchOption, params string[] extensions)
         {
             if (extensions == null)

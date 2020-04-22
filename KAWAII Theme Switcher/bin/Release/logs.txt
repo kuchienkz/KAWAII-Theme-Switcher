@@ -1,43 +1,11 @@
-[Saturday, April 18, 2020]
-Environtment directory: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release\
+[Wednesday, April 22, 2020]
+Environtment directory: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release
 _Using Standard mode...
 __startup.txt NOT found!
-__exclusion.txt found! Loading exclusion...
-__Exclusion count: 4
-_Waiting for sound to finish: 3000 milliseconds
-___Theme applied: C:\Windows\Resources\Ease of Access Themes\hc1.theme
-_END
-
-[Saturday, April 18, 2020]
-Environtment directory: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release\
-_Using Standard mode...
-__startup.txt NOT found!
-__exclusion.txt found! Loading exclusion...
-__Exclusion count: 8
-_Theme Change Sound found! Duration: 0 milliseconds
-_Waiting for sound to finish: 3000 milliseconds
+lockscreen.txt found! Loading Lockscreen backgrounds...
+___Lockscreen applied: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release\Lockscreen\7.jpg
+_Theme Change Sound found! Duration: 2049 milliseconds
+_Waiting for sound to finish: 3549 milliseconds
 ___Theme applied: C:\Windows\Resources\Themes\Shiro.theme
-_END
-
-[Saturday, April 18, 2020]
-Environtment directory: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release\
-_Using Standard mode...
-__startup.txt NOT found!
-__exclusion.txt found! Loading exclusion...
-__Exclusion count: 8
-_Theme Change Sound found! Duration: 1858 milliseconds
-_Waiting for sound to finish: 3358 milliseconds
-___Theme applied: C:\Windows\Resources\Themes\Megumin Dark Mode.theme
-_END
-
-[Saturday, April 18, 2020]
-Environtment directory: E:\Devs\KAWAII-Theme-Switcher\KAWAII Theme Switcher\bin\Release\
-_Using Standard mode...
-__startup.txt NOT found!
-__exclusion.txt found! Loading exclusion...
-__Exclusion count: 8
-_Theme Change Sound found! Duration: 1858 milliseconds
-_Waiting for sound to finish: 3358 milliseconds
-___Theme applied: C:\Windows\Resources\Themes\Megumin.theme
 _END
 
