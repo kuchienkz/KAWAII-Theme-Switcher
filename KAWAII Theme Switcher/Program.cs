@@ -285,12 +285,12 @@ namespace KAWAII_Theme_Switcher
                     // Theme selection
                     if (File.Exists(appFolder + @"\RSequence.txt"))
                     {
-                        if (!File.Exists(appFolder + @"\loaded.txt"))
+                        if (!File.Exists(appFolder + @"\theme.used"))
                         {
-                            File.WriteAllText(appFolder + @"\loaded.txt", "");
+                            File.WriteAllText(appFolder + @"\theme.used", "");
                         }
-                        var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
-                        if (ReadAllLines(appFolder + "\\RSequence.txt").Count() <= 0)
+                        var loaded = ReadAllLines(appFolder + "\\theme.used").ToList();
+                        if (ReadAllLines(appFolder + "\\RSequence.txt").Count() == 0)
                         {
                             var rs = latestThemeList.ToList();
                             rs.Shuffle();
@@ -321,16 +321,16 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(lrse);
                         path = rse.Dequeue();
                         loaded.Add(path);
-                        File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                        File.WriteAllLines(appFolder + @"\theme.used", loaded);
                         File.WriteAllLines(appFolder + @"\RSequence.txt", rse);
                     }
                     else if (File.Exists(appFolder + @"\Sequence.txt"))
                     {
-                        if (!File.Exists(appFolder + @"\loaded.txt"))
+                        if (!File.Exists(appFolder + @"\theme.used"))
                         {
-                            File.WriteAllText(appFolder + @"\loaded.txt", "");
+                            File.WriteAllText(appFolder + @"\theme.used", "");
                         }
-                        var loaded = ReadAllLines(appFolder + "\\loaded.txt").ToList();
+                        var loaded = ReadAllLines(appFolder + "\\theme.used").ToList();
                         if (ReadAllLines(appFolder + "\\Sequence.txt").Count() <= 0)
                         {
                             var rs = new DirectoryInfo(KAWAII_Theme_Helper.windir + @"\Resources\Themes").GetFiles("*.theme", SearchOption.TopDirectoryOnly).Select(item => item.FullName).ToList();
@@ -361,14 +361,14 @@ namespace KAWAII_Theme_Switcher
                         var rse = new Queue<string>(lrse);
                         path = rse.Dequeue();
                         loaded.Add(path);
-                        File.WriteAllLines(appFolder + @"\loaded.txt", loaded);
+                        File.WriteAllLines(appFolder + @"\theme.used", loaded);
                         File.WriteAllLines(appFolder + @"\Sequence.txt", rse);
                     }
                     else
                     {
-                        if (File.Exists(appFolder + @"\loaded.txt"))
+                        if (File.Exists(appFolder + @"\theme.used"))
                         {
-                            File.Delete(appFolder + @"\loaded.txt");
+                            File.Delete(appFolder + @"\theme.used");
                         }
                         path = latestThemeList[ThreadSafeRandom.ThisThreadsRandom.Next(0, latestThemeList.Count() - 1)];
                         while (Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentThemeName() || Path.GetFileNameWithoutExtension(path) == KAWAII_Theme_Helper.GetCurrentVisualStyleName())
@@ -671,10 +671,10 @@ namespace KAWAII_Theme_Switcher
 
         public static void CreateStartupTaskSchedule()
         {
-            // Check for existing task
+            // Check for existing tasks
             var output = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /QUERY /FO LIST /TN ""{TASKPATH}""");
             
-            if (output.EqualsIgnoreCase("ERROR: The system cannot find the file specified."))
+            if (output.Contains("ERROR: The system cannot find"))
             {
                 // task doesnt exists
                 // create task
