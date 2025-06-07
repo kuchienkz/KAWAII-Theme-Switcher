@@ -5,7 +5,7 @@
  * 
  * or whatever.
  * 
- * I don't give a fuck, as long as you leave my name and email AS IT IS when distributing it.
+ * I don't give a fuck, as long as you leave my name and email AS IS when distributing it.
  * 
  * ALSO, KEEP IT FREE!!!
  * 
@@ -37,6 +37,7 @@ namespace KAWAII_Theme_Switcher
 {
     public enum WindowsVersion
     {
+        WIN11,
         WIN10,
         WIN8,
         WIN7,
@@ -94,12 +95,12 @@ namespace KAWAII_Theme_Switcher
                     {
                         if (File.Exists(args[1]))
                         {
-                            KAWAII_Theme_Helper.ChangeLockscreenBackground(args[1], winVer);
+                            KAWAII_Theme_Helper.ChangeLockscreenBackground(args[1], winVer, log);
                             log.Add("___Lockscreen applied: " + args[1]);
                         }
                         else if (File.Exists(appFolder + "\\" + args[1]))
                         {
-                            KAWAII_Theme_Helper.ChangeLockscreenBackground(appFolder + "\\" + args[1], winVer);
+                            KAWAII_Theme_Helper.ChangeLockscreenBackground(appFolder + "\\" + args[1], winVer, log);
                             log.Add("___Lockscreen applied: " + args[1]);
                         }
                     }
@@ -502,12 +503,12 @@ namespace KAWAII_Theme_Switcher
 
                     if (File.Exists(themeDir + "\\lockscreen.jpg"))
                     {
-                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\lockscreen.jpg", winVer);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\lockscreen.jpg", winVer, log);
                         log.Add("___Lockscreen applied: " + themeDir + "\\lockscreen.jpg");
                     }
                     else if (File.Exists(themeDir + "\\logon.jpg"))
                     {
-                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\logon.jpg", winVer);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(themeDir + "\\logon.jpg", winVer, log);
                         log.Add("___Lockscreen applied: " + themeDir + "\\logon.jpg");
                     }
                     else
@@ -518,7 +519,7 @@ namespace KAWAII_Theme_Switcher
                         {
                             if (Path.GetFileNameWithoutExtension(bg).EqualsIgnoreCase(Path.GetFileNameWithoutExtension(path)))
                             {
-                                KAWAII_Theme_Helper.ChangeLockscreenBackground(bg, winVer);
+                                KAWAII_Theme_Helper.ChangeLockscreenBackground(bg, winVer, log);
                                 log.Add("___Lockscreen applied: " + bg);
                                 break;
                             }
@@ -541,7 +542,7 @@ namespace KAWAII_Theme_Switcher
                             File.Delete(appFolder + "\\lockscreen.used");
                         }
                         var s = lockscreens[ThreadSafeRandom.ThisThreadsRandom.Next(0, lockscreens.Count() - 1)];
-                        KAWAII_Theme_Helper.ChangeLockscreenBackground(s, winVer);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(s, winVer, log);
                         log.Add("___Lockscreen applied: " + s);
                     }
                     else if (mode.EqualsIgnoreCase("sequence"))
@@ -578,7 +579,7 @@ namespace KAWAII_Theme_Switcher
                         loaded.Add(lg);
                         File.WriteAllLines(appFolder + @"\lockscreen.used", loaded);
                         File.WriteAllLines(appFolder + @"\lockscreen.seq", rse);
-                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer, log);
                         log.Add("___Lockscreen applied: " + lg);
                     }
                     else if (mode.EqualsIgnoreCase("random sequence"))
@@ -615,7 +616,7 @@ namespace KAWAII_Theme_Switcher
                         loaded.Add(lg);
                         File.WriteAllLines(appFolder + @"\lockscreen.used", loaded);
                         File.WriteAllLines(appFolder + @"\lockscreen.rseq", rse);
-                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer);
+                        KAWAII_Theme_Helper.ChangeLockscreenBackground(lg, winVer, log);
                         log.Add("___Lockscreen applied: " + lg);
                     }
                 }
@@ -676,15 +677,23 @@ namespace KAWAII_Theme_Switcher
             
             if (output.Contains("ERROR: The system cannot find"))
             {
-                // task doesnt exists
-                // create task
-                Program.log.Add("___Startup Task NOT found! Scheduling a new task...");
-                var result = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /CREATE /SC ONLOGON /TN ""{TASKPATH}"" /TR ""{Application.ExecutablePath}"" /RL HIGHEST");
-                Console.WriteLine(result);
-                if (result.Contains("SUCCESS"))
+                Program.log.Add("___Startup Task NOT found! Creating new task...");
+            } else
+            {
+                Program.log.Add("___Startup Task found! Updating existing task...");
+                var cDelete = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /DELETE /TN ""{TASKPATH}"" /F");
+                Console.WriteLine(cDelete);
+                if (cDelete.Contains("SUCCESS"))
                 {
-                    Program.log.Add("___Startup Task created successfully!");
+                    Program.log.Add("___Old task deleted successfully!");
                 }
+            }
+           
+            var result = ExecuteCommandLineCommands($@"C:\Windows\System32\schtasks.exe /CREATE /SC ONLOGON /TN ""{TASKPATH}"" /TR ""'{Application.ExecutablePath}'"" /RL HIGHEST");
+            Console.WriteLine(result);
+            if (result.Contains("SUCCESS"))
+            {
+                Program.log.Add("___Startup Task created successfully!");
             }
         }
 
@@ -769,7 +778,11 @@ namespace KAWAII_Theme_Switcher
                     }
                 }
 
-                if (r.Contains("Windows 10"))
+                if (r.Contains("Windows 11"))
+                {
+                    ver =  WindowsVersion.WIN11;
+                }
+                else if (r.Contains("Windows 10"))
                 {
                     ver =  WindowsVersion.WIN10;
                 }

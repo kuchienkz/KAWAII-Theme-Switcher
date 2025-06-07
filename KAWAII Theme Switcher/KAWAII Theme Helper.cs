@@ -20,6 +20,7 @@
 
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -200,26 +201,33 @@ namespace KAWAII_Theme_Switcher
         }
 
         // Logon Stuff
-        public static void ChangeLockscreenBackground(string jpegFilename, WindowsVersion version)
+        public static void ChangeLockscreenBackground(string jpegFilename, WindowsVersion version, List<string> log)
         {
             if (version == WindowsVersion.UNSUPPORTED)
             {
-                Console.WriteLine("Windows version currently not supported for changing lock screen background");
+                var i = "Windows version currently not supported for changing lock screen background";
+                Console.WriteLine(i);               
+                log.Add(i);
+
                 return;
             }
 
             if (!File.Exists(jpegFilename))
             {
-                Console.WriteLine("Cant change lock screen background! Image file doesnt exists: " + jpegFilename);
+                var i = "Can't change lock screen background! Image file doesnt exists: " + jpegFilename;
+                Console.WriteLine(i);
+                log.Add(i);
+
                 return;
             }
 
-            if (version == WindowsVersion.WIN10 || version == WindowsVersion.WIN8)
+            if (version == WindowsVersion.WIN11 || version == WindowsVersion.WIN10 || version == WindowsVersion.WIN8)
             {
                 var regChk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization");
                 if (regChk.GetValue("NoChangingLockScreen") == null || (int)regChk.GetValue("NoChangingLockScreen") == 0)
                 {
                     Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\Windows\Personalization").SetValue("NoChangingLockScreen", 1);
+                    log.Add("Locksreen slideshow disabled");
                 }
 
                 var command = @"Start-Process -filePath ""$env:systemroot\system32\takeown.exe"" -ArgumentList "" /F `""$env:programdata\Microsoft\Windows\SystemData`"" /R /A /D Y"" -NoNewWindow -Wait
@@ -248,17 +256,26 @@ Copy-Item -Path """ + jpegFilename + @""" -Destination ""$env:systemroot\Web\Scr
                     Arguments = $"-NoProfile -ExecutionPolicy unrestricted -EncodedCommand {psCommandBase64}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = true,
                 };
                 var p = new Process();
                 p.StartInfo = startInfo;
                 p.Start();
+                while (!p.StandardOutput.EndOfStream)
+                {
+                    string line = p.StandardOutput.ReadLine();
+                    Console.WriteLine(line);
+                    log.Add(line);
+                }
             }
             else if (version == WindowsVersion.WIN7)
             {
                 if (new FileInfo(jpegFilename).Length > 256000)
                 {
-                    Console.WriteLine("Cant change logon background! Image file must be JPG with size no more than 256 KB.");
+                    var i = "Cant change logon background! Image file must be JPG with size no more than 256 KB.";
+                    Console.WriteLine(i);
+                    log.Add(i);
                     return;
                 }
 
